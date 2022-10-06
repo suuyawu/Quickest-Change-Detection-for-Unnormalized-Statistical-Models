@@ -15,7 +15,6 @@ class B_Stat:
     def __init__(
         self,
         kernel: Kernel,
-        hyper_threshold:int,
         initial_data: torch.tensor,
         ert: int,
         window_size: int=100,
@@ -30,7 +29,6 @@ class B_Stat:
         self.ert = ert
         self.test_every_k = test_every_k or window_size
         self.fpr = test_every_k/ert
-        self.threshold = hyper_threshold
         
         self.kernel = kernel
         self.n_blocks = self.N // self.window_size

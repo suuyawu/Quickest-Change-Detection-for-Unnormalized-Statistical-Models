@@ -25,7 +25,6 @@ def detection_procedure(detector, samples, change_point, null_model, alter_model
     A sequential detection procedure
     """
     t = 0
-    delay = 0
     N = len(samples)
     sample_stream = iter(samples)
 
@@ -34,26 +33,32 @@ def detection_procedure(detector, samples, change_point, null_model, alter_model
         t += 1
         new_x = next(sample_stream)
         detector._update(new_x.reshape(1, -1), null_model, alter_model)
-    # if t >= change_point:
-    #     delay = t-change_point
     return t-change_point
 
 #Model definition and Data Generation
+# mean = torch.tensor([0.]*20)
+# alter_mean = torch.tensor([0.31]*20)
+# logvar = torch.diag(torch.tensor([1.]*20)).log()
+
 mean = torch.tensor([0.,1.])
 logvar = torch.tensor([[0., 1.], [1., 5.]])
-change_point = 1000
-total_length = 1200
-ptb_mean = 1
+ptb_mean = 1 * torch.randn(mean.size())
+alter_mean = mean + ptb_mean
+
+change_point = 500
+total_length = 10000
 
 null_mvn = torch.distributions.multivariate_normal.MultivariateNormal(mean, logvar.exp())
 null_model  = MVN(mean, logvar)
-ptb_mean = ptb_mean * torch.randn(mean.size())
-alter_mean = mean + ptb_mean
+initial_data = null_mvn.sample((change_point,))
+
 alter_mvn = torch.distributions.multivariate_normal.MultivariateNormal(alter_mean, logvar.exp())
 alter_model  = MVN(alter_mean, logvar)
+
+#calculate lower bound
 invcov = torch.linalg.inv(logvar.exp())
-t1 = 0.5 * ((ptb_mean - mean) * invcov).matmul((ptb_mean - mean).t())
-KL_divergence = sum(t1).item()
+t1 = 0.5 * ((alter_mean - mean).matmul(invcov)).matmul((alter_mean - mean).t())
+KL_divergence = t1.item()
 
 #plot set up
 cm = 1/2.54
@@ -78,7 +83,7 @@ def experiment(hyper_threshold, num_trials, Figure1=True):
         alter = alter_mvn.sample((total_length-change_point,))
         sample = torch.cat((null, alter), dim=0)
 
-        scanb = B_Stat(hyper_threshold = hyper_threshold, kernel=load_kernel('gaussian_rbf'), initial_data=null, ert=512, window_size = 25, test_every_k=1, n_samples=25000)
+        scanb = B_Stat(kernel=load_kernel('gaussian_rbf'), initial_data=initial_data, ert=int(np.exp(hyper_threshold)), window_size = 25, test_every_k=1, n_samples=25000)
         
         edd_cusum = detection_procedure(cusum, sample, change_point, null_model, alter_model)
         edds_cusum.append(edd_cusum)
@@ -122,15 +127,17 @@ def experiment(hyper_threshold, num_trials, Figure1=True):
 
             plt.savefig('./figure1.pdf', bbox_inches='tight')
             plt.close()
+    print(edds_scanb)
+
     # edds_cusum = [item for item in edds_cusum if item >=0]
     # edds_cusumf = [item for item in edds_cusumf if item >=0]
     # edds_srp = [item for item in edds_srp if item >=0]
     # edds_scanb = [item for item in edds_scanb if item >=0]
-
-    return sum(edds_cusum)/num_trials, sum(edds_cusumf)/num_trials, sum(edds_srp)/num_trials, sum(edds_scanb)/num_trials
+    
+    return sum(edds_cusum)/len(edds_cusum), sum(edds_cusumf)/len(edds_cusumf), sum(edds_srp)/num_trials, sum(edds_scanb)/len(edds_scanb)
 
 #repeat experiments to get CADD versus gamma
-log_gammas = [10, 15, 20, 25, 30, 35, 40]
+log_gammas = [np.log(2000), np.log(5000), np.log(10000), np.log(20000)]
 num_trials = 100
 CADD_cumsumf = []
 CADD_cumsum = []
@@ -138,10 +145,7 @@ CADD_srp = []
 CADD_scanb = []
 
 for log_gamma in log_gammas:
-    if log_gamma == 10:
-        cadd_cusum, cadd_cusumf, cadd_srp, cadd_scanb = experiment(log_gamma, num_trials, Figure1=True)
-    else:
-        cadd_cusum, cadd_cusumf, cadd_srp, cadd_scanb = experiment(log_gamma, num_trials, Figure1=False)
+    cadd_cusum, cadd_cusumf, cadd_srp, cadd_scanb = experiment(log_gamma, num_trials, Figure1=False)
     CADD_cumsum.append(cadd_cusum)
     CADD_cumsumf.append(cadd_cusumf)
     CADD_srp.append(cadd_srp)
