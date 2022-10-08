@@ -1,5 +1,6 @@
 import collections.abc as container_abcs
 import errno
+import hashlib
 import numpy as np
 import os
 import pickle
@@ -113,28 +114,40 @@ def process_dataset(dataset):
 
 
 def process_control():
-    data_shape = {'MNIST': [1, 28, 28], 'FashionMNIST': [1, 28, 28], 'SVHN': [3, 32, 32], 'CIFAR10': [3, 32, 32],
-                  'CIFAR100': [3, 32, 32]}
-    cfg['linear'] = {}
-    cfg['mlp'] = {'hidden_size': 128, 'scale_factor': 2, 'num_layers': 2, 'activation': 'relu'}
-    cfg['cnn'] = {'hidden_size': [64, 128, 256, 512]}
-    cfg['resnet9'] = {'hidden_size': [64, 128, 256, 512]}
-    cfg['resnet18'] = {'hidden_size': [64, 128, 256, 512]}
-    cfg['wresnet28x2'] = {'depth': 28, 'widen_factor': 2, 'drop_rate': 0.0}
-    cfg['wresnet28x8'] = {'depth': 28, 'widen_factor': 8, 'drop_rate': 0.0}
-    cfg['data_name'] = cfg['control']['data_name']
-    cfg['data_shape'] = data_shape[cfg['data_name']]
-    cfg['model_name'] = cfg['control']['model_name']
-    model_name = cfg['model_name']
-    cfg[model_name]['shuffle'] = {'train': True, 'test': False}
-    cfg[model_name]['optimizer_name'] = 'SGD'
-    cfg[model_name]['lr'] = 1e-1
-    cfg[model_name]['momentum'] = 0.9
-    cfg[model_name]['weight_decay'] = 5e-4
-    cfg[model_name]['nesterov'] = True
-    cfg[model_name]['scheduler_name'] = 'CosineAnnealingLR'
-    cfg[model_name]['num_epochs'] = 400
-    cfg[model_name]['batch_size'] = {'train': 250, 'test': 250}
+    cfg['data_name'], cfg['num_dims'] = cfg['control']['data_name'].split('-')
+    cfg['num_pre'] = int(cfg['control']['num_pre'])
+    cfg['num_total'] = int(cfg['control']['num_total'])
+    cfg['change'] = cfg['control']['change']
+    cfg['noise'] = float(cfg['control']['noise'])
+    cfg['test_mode'] = cfg['control']['noise']
+    cfg['arl'] = int(cfg['control']['arl'])
+    cfg['num_trials'] = 100
+    cfg['cpd'] = {}
+    cfg['cpd']['batch_size'] = {'test': 1}
+    cfg['cpd']['shuffle'] = {'test': False}
+    cfg['MVN'] = {'mean': torch.zeros((cfg['num_dims']), ),
+                  'logvar': np.log(0.5) * torch.ones((cfg['num_dims'], cfg['num_dims']))}
+    cfg['MVN']['logvar'].fill_diagonal_(0)
+    cfg['EXP'] = {'power': torch.tensor([4.]), 'tau': torch.zeros((cfg['num_dims']), )}
+    dim_v = cfg['num_dims']
+    dim_h = int(np.ceil(0.8 * cfg['num_dims']))
+    generator = torch.Generator()
+    generator.manual_seed(cfg['seed'])
+    W = torch.randn(dim_v, dim_h, generator=generator)
+    v = torch.randn(dim_v, generator=generator)
+    h = torch.randn(dim_h, generator=generator)
+    cfg['RBM'] = {'W': W, 'v': v, 'h': h, 'num_iters': int(1000)}
+    cfg['params'] = make_params(cfg['data_name'])
+    cfg['footprint'] = make_footprint(cfg['params'])
+    # model_name = cfg['model_name']
+    # cfg[model_name] = {}
+    # cfg[model_name]['optimizer_name'] = 'Adam'
+    # cfg[model_name]['lr'] = 1e-3
+    # cfg[model_name]['betas'] = (0.9, 0.999)
+    # cfg[model_name]['momentum'] = 0.9
+    # cfg[model_name]['nesterov'] = True
+    # cfg[model_name]['weight_decay'] = 0
+    # cfg[model_name]['num_iters'] = 20
     return
 
 
@@ -232,3 +245,38 @@ def collate(input):
     for k in input:
         input[k] = torch.stack(input[k], 0)
     return input
+
+
+def make_params(data_name):
+    if data_name == 'MVN':
+        mean = cfg['mvn']['mean']
+        logvar = cfg['mvn']['logvar']
+        change_mean, change_logvar = cfg['change'].split('-')
+        change_mean, change_logvar = float(change_mean), float(change_logvar)
+        params = {'data_name': data_name, 'num_pre': cfg['num_pre'], 'num_total': cfg['num_total'],
+                  'num_trials': cfg['num_trials'], 'mean': mean, 'logvar': logvar,
+                  'change_mean': change_mean, 'change_logvar': change_logvar}
+    elif data_name == 'EXP':
+        power = cfg['exp']['power']
+        tau = cfg['exp']['tau']
+        change_tau = float(cfg['change'])
+        params = {'data_name': data_name, 'num_pre': cfg['num_pre'], 'num_total': cfg['num_total'],
+                  'num_trials': cfg['num_trials'], 'power': power, 'tau': tau, 'change_tau': change_tau}
+    elif data_name == 'RBM':
+        W = cfg['rbm']['W']
+        v = cfg['rbm']['v']
+        h = cfg['rbm']['h']
+        num_iters = cfg['rbm']['num_iters']
+        change_W = float(cfg['change'])
+        params = {'data_name': data_name, 'num_pre': cfg['num_pre'], 'num_total': cfg['num_total'],
+                  'num_trials': cfg['num_trials'], 'W': W, 'v': v, 'h': h, 'num_iters': num_iters, 'change_W': change_W}
+    else:
+        raise ValueError('Not valid data name')
+    return params
+
+
+def make_footprint(params):
+    hash_name = '_'.join([str(params[x]) for x in params]).encode('utf-8')
+    m = hashlib.sha256(hash_name)
+    footprint = m.hexdigest()
+    return footprint

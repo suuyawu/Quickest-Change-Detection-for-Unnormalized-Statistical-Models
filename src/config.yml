@@ -1,8 +1,13 @@
 ---
 # control
 control:
-  data_name: MNIST
-  model_name: linear
+  data_name: MVN
+  num_pre: 500
+  num_total: 10000
+  change: 0.1-0
+  noise: 0
+  test_mode: scusum
+  arl: 2000
 # experiment
 num_workers: 0
 init_seed: 0
