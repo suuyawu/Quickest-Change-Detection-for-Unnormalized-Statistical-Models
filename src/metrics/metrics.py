@@ -4,15 +4,15 @@ from config import cfg
 from utils import recur
 
 
-def Accuracy(output, target, topk=1):
+def EDD(cp, pre_data, post_data):
     with torch.no_grad():
-        if target.dtype != torch.int64:
-            target = (target.topk(1, 1, True, True)[1]).view(-1)
-        batch_size = target.size(0)
-        pred_k = output.topk(topk, 1, True, True)[1]
-        correct_k = pred_k.eq(target.view(-1, 1).expand_as(pred_k)).float().sum()
-        acc = (correct_k * (100.0 / batch_size)).item()
-    return acc
+        target_cp = len(pre_data)
+        N = len(pre_data) + len(post_data)
+        if cp < target_cp:
+            edd = N - target_cp
+        else:
+            edd = cp - target_cp
+    return edd
 
 
 def RMSE(output, target):
@@ -24,26 +24,16 @@ def RMSE(output, target):
 class Metric(object):
     def __init__(self, metric_name):
         self.metric_name = self.make_metric_name(metric_name)
-        self.metric = {'Loss': (lambda input, output: output['loss'].item()),
-                       'Accuracy': (lambda input, output: recur(Accuracy, output['target'], input['target'])),
-                       'RMSE': (lambda input, output: recur(RMSE, output['target'], input['target']))}
+        self.metric = {'EDD': (lambda input, output: EDD(output['cp'], input['pre_data'], input['post_data']))}
         self.reset()
 
     def make_metric_name(self, metric_name):
-        for split in metric_name:
-            if cfg['data_name'] in ['MNIST', 'FashionMNIST', 'SVHN', 'CIFAR10', 'CIFAR100']:
-                metric_name[split] += ['Accuracy']
-            else:
-                raise ValueError('Not valid data name')
         return metric_name
 
     def reset(self):
-        if cfg['data_name'] in ['MNIST', 'FashionMNIST', 'SVHN', 'CIFAR10', 'CIFAR100']:
-            pivot = -float('inf')
-            pivot_direction = 'up'
-            pivot_name = 'Accuracy'
-        else:
-            raise ValueError('Not valid data name')
+        pivot = None
+        pivot_name = None
+        pivot_direction = None
         self.pivot, self.pivot_name, self.pivot_direction = pivot, pivot_name, pivot_direction
         return
 

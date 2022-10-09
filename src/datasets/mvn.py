@@ -27,10 +27,11 @@ class MVN(Dataset):
 
     def __getitem__(self, index):
         pre, post = torch.tensor(self.pre[index]), torch.tensor(self.post[index])
-        pre_param = {'mean': self.mean, 'logvar': self.logvar}
-        post_param = {'mean': torch.tensor(self.meta['mean']),
-                      'logvar': torch.tensor(self.meta['logvar'])}
-        input = {'pre': pre, 'post': post, 'pre_param': pre_param, 'post_param': post_param}
+        pre_param = {'mean': torch.tensor(self.meta['pre']['mean']),
+                     'logvar': torch.tensor(self.meta['pre']['logvar'])}
+        post_param = {'mean': torch.tensor(self.meta['post']['mean']),
+                      'logvar': torch.tensor(self.meta['post']['logvar'])}
+        input = {'pre_data': pre, 'pre_param': pre_param, 'post_data': post, 'post_param': post_param}
         return input
 
     def __len__(self):
@@ -63,13 +64,15 @@ class MVN(Dataset):
 
     def make_data(self):
         num_dims = self.mean.size(-1)
-        pre_mvn = torch.distributions.multivariate_normal.MultivariateNormal(self.mean, self.logvar.exp())
+        pre_mean = self.mean
+        pre_logvar = self.logvar
+        pre_mvn = torch.distributions.multivariate_normal.MultivariateNormal(pre_mean, pre_logvar.exp())
         pre = pre_mvn.sample((self.num_trials, self.num_pre))
         post_mean = self.mean + self.change_mean
         post_logvar = self.logvar + self.change_logvar * torch.eye(num_dims)
         post_mvn = torch.distributions.multivariate_normal.MultivariateNormal(post_mean, post_logvar.exp())
         post = post_mvn.sample((self.num_trials, self.num_total - self.num_pre))
         pre, post = pre.numpy(), post.numpy()
-        meta = {'pre': {'mean': self.mean.numpy(), 'logvar': self.logvar.numpy()},
+        meta = {'pre': {'mean': pre_mean.numpy(), 'logvar': pre_logvar.numpy()},
                 'post': {'mean': post_mean.numpy(), 'logvar': post_logvar.numpy()}}
         return pre, post, meta

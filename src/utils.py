@@ -108,27 +108,29 @@ def recur(fn, input, *args):
 
 
 def process_dataset(dataset):
-    cfg['data_size'] = {'train': len(dataset['train']), 'test': len(dataset['test'])}
-    cfg['target_size'] = dataset['train'].target_size
+    cfg['data_size'] = {'test': len(dataset['test'])}
     return
 
 
 def process_control():
-    cfg['data_name'], cfg['num_dims'] = cfg['control']['data_name'].split('-')
+    data_name_list = cfg['control']['data_name'].split('-')
+    cfg['data_name'], cfg['num_dims'] = data_name_list[0], int(data_name_list[1])
     cfg['num_pre'] = int(cfg['control']['num_pre'])
     cfg['num_total'] = int(cfg['control']['num_total'])
     cfg['change'] = cfg['control']['change']
     cfg['noise'] = float(cfg['control']['noise'])
-    cfg['test_mode'] = cfg['control']['noise']
+    cfg['test_mode'] = cfg['control']['test_mode']
     cfg['arl'] = int(cfg['control']['arl'])
+    if cfg['test_mode'] in ['cusum', 'scusum']:
+        cfg['model_name'] = cfg['data_name'].lower()
     cfg['num_trials'] = 100
     cfg['cpd'] = {}
     cfg['cpd']['batch_size'] = {'test': 1}
     cfg['cpd']['shuffle'] = {'test': False}
-    cfg['MVN'] = {'mean': torch.zeros((cfg['num_dims']), ),
+    cfg['MVN'] = {'mean': torch.zeros(cfg['num_dims']),
                   'logvar': np.log(0.5) * torch.ones((cfg['num_dims'], cfg['num_dims']))}
     cfg['MVN']['logvar'].fill_diagonal_(0)
-    cfg['EXP'] = {'power': torch.tensor([4.]), 'tau': torch.zeros((cfg['num_dims']), )}
+    cfg['EXP'] = {'power': torch.tensor([4.]), 'tau': torch.tensor([1.]), 'num_dims': torch.tensor([cfg['num_dims']])}
     dim_v = cfg['num_dims']
     dim_h = int(np.ceil(0.8 * cfg['num_dims']))
     generator = torch.Generator()
@@ -243,30 +245,37 @@ def resume(path, verbose=True, resume_mode=1):
 
 def collate(input):
     for k in input:
-        input[k] = torch.stack(input[k], 0)
+        if k in ['pre_param', 'post_param']:
+            input[k] = input[k][0]
+        elif k in ['pre_data', 'post_data']:
+            input[k] = torch.cat(input[k], 0)
+        else:
+            input[k] = torch.cat(input[k], 0)
     return input
 
 
 def make_params(data_name):
     if data_name == 'MVN':
-        mean = cfg['mvn']['mean']
-        logvar = cfg['mvn']['logvar']
+        mean = cfg['MVN']['mean']
+        logvar = cfg['MVN']['logvar']
         change_mean, change_logvar = cfg['change'].split('-')
         change_mean, change_logvar = float(change_mean), float(change_logvar)
         params = {'data_name': data_name, 'num_pre': cfg['num_pre'], 'num_total': cfg['num_total'],
                   'num_trials': cfg['num_trials'], 'mean': mean, 'logvar': logvar,
                   'change_mean': change_mean, 'change_logvar': change_logvar}
     elif data_name == 'EXP':
-        power = cfg['exp']['power']
-        tau = cfg['exp']['tau']
+        power = cfg['EXP']['power']
+        tau = cfg['EXP']['tau']
+        num_dims = cfg['EXP']['num_dims']
         change_tau = float(cfg['change'])
         params = {'data_name': data_name, 'num_pre': cfg['num_pre'], 'num_total': cfg['num_total'],
-                  'num_trials': cfg['num_trials'], 'power': power, 'tau': tau, 'change_tau': change_tau}
+                  'num_trials': cfg['num_trials'], 'power': power, 'tau': tau, 'num_dims': num_dims,
+                  'change_tau': change_tau}
     elif data_name == 'RBM':
-        W = cfg['rbm']['W']
-        v = cfg['rbm']['v']
-        h = cfg['rbm']['h']
-        num_iters = cfg['rbm']['num_iters']
+        W = cfg['RBM']['W']
+        v = cfg['RBM']['v']
+        h = cfg['RBM']['h']
+        num_iters = cfg['RBM']['num_iters']
         change_W = float(cfg['change'])
         params = {'data_name': data_name, 'num_pre': cfg['num_pre'], 'num_total': cfg['num_total'],
                   'num_trials': cfg['num_trials'], 'W': W, 'v': v, 'h': h, 'num_iters': num_iters, 'change_W': change_W}

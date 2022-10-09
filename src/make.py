@@ -97,7 +97,7 @@ def main():
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         exp_tau_controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode,
                                          control_name)
-        data_names = ['EXP-50']
+        data_names = ['RBM-50']
         num_pre = ['500']
         num_post = ['10000']
         change = []
@@ -115,7 +115,7 @@ def main():
                                        control_name)
         controls = mvn_mean_controls + mvn_logvar_controls + exp_tau_controls + rbm_W_controls
     elif mode == 'mvn-mean':
-        script_name = [['{}_cp.py'.format(run)]]
+        script_name = [['{}_cpd.py'.format(run)]]
         data_names = ['MVN-2']
         num_pre = ['500']
         num_post = ['10000']
@@ -128,7 +128,7 @@ def main():
             change_i = '{}-{}'.format(change_mean_i, change_logvar)
             change.append(change_i)
         noise = ['0']
-        test_mode = ['cumsum', 'scanb', 'scusum']
+        test_mode = ['cusum', 'scanb', 'scusum']
         arl = ['500', '1000', '1500', '2000', '2500', '5000', '7500', '10000', '15000', '20000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode, control_name)

@@ -2,8 +2,8 @@ import argparse
 import torch
 import torch.backends.cudnn as cudnn
 from config import cfg, process_args
-from data import fetch_dataset
-from utils import process_control
+from data import fetch_dataset, make_data_loader
+from utils import process_dataset, process_control, collate
 
 cudnn.benchmark = True
 parser = argparse.ArgumentParser(description='cfg')
@@ -15,7 +15,6 @@ process_args(args)
 
 
 def main():
-    process_control()
     seeds = list(range(cfg['init_seed'], cfg['init_seed'] + cfg['num_experiments']))
     for i in range(cfg['num_experiments']):
         model_tag_list = [str(seeds[i]), cfg['control_name']]
@@ -27,7 +26,16 @@ def main():
 
 def runExperiment():
     cfg['seed'] = int(cfg['model_tag'].split('_')[0])
+    process_control()
     torch.manual_seed(cfg['seed'])
     torch.cuda.manual_seed(cfg['seed'])
     dataset = fetch_dataset(cfg['data_name'], cfg['params'])
+    process_dataset(dataset)
+    data_loader = make_data_loader(dataset, 'cpd')
+    input = next(iter(data_loader['test']))
+    print(input)
     return
+
+
+if __name__ == "__main__":
+    main()

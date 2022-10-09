@@ -12,26 +12,31 @@ class RBM(Dataset):
     def __init__(self, root, **params):
         super().__init__()
         self.root = os.path.expanduser(root)
+        self.num_pre = params['num_pre']
+        self.num_total = params['num_total']
         self.num_trials = params['num_trials']
-        self.num_samples = params['num_samples']
         self.W = params['W']
         self.v = params['v']
         self.h = params['h']
         self.num_iters = params['num_iters']
-        self.ptb_W = params['ptb_W']
+        self.change_W = params['change_W']
         self.footprint = make_footprint(params)
         split_name = '{}_{}'.format(self.data_name, self.footprint)
         if not check_exists(os.path.join(self.processed_folder, split_name)):
             print('Not exists {}, create from scratch with {}.'.format(split_name, params))
             self.process()
-        self.null, self.alter, self.meta = load(os.path.join(os.path.join(self.processed_folder, split_name)),
-                                                mode='pickle')
+        self.pre, self.post, self.meta = load(os.path.join(os.path.join(self.processed_folder, split_name)),
+                                              mode='pickle')
 
     def __getitem__(self, index):
-        null, alter = torch.tensor(self.null[index]), torch.tensor(self.alter[index])
-        null_param = {'W': self.W, 'v': self.v, 'h': self.h}
-        alter_param = {'W': torch.tensor(self.meta['W'][index]), 'v': self.v, 'h': self.h}
-        input = {'null': null, 'alter': alter, 'null_param': null_param, 'alter_param': alter_param}
+        pre, post = torch.tensor(self.pre[index]), torch.tensor(self.post[index])
+        pre_param = {'W': torch.tensor(self.meta['pre']['W']),
+                     'v': torch.tensor(self.meta['pre']['v']),
+                     'h': torch.tensor(self.meta['pre']['h'])}
+        post_param = {'W': torch.tensor(self.meta['post']['W']),
+                      'v': torch.tensor(self.meta['post']['v']),
+                      'h': torch.tensor(self.meta['post']['h'])}
+        input = {'pre_data': pre, 'pre_param': pre_param, 'post_data': post, 'post_param': post_param}
         return input
 
     def __len__(self):
@@ -64,25 +69,20 @@ class RBM(Dataset):
 
     def make_data(self):
         with torch.no_grad():
-            d = self.v.size(0)
-            params = {'W': self.W, 'v': self.v, 'h': self.h}
-            null_rbm = models.rbm(params).to(cfg['device'])
-            null, alter = [], []
-            alter_W = []
-            for i in range(self.num_trials):
-                ptb_W = self.ptb_W * torch.randn(self.W.size())
-                alter_W_i = self.W + ptb_W
-                params_i = {'W': alter_W_i, 'v': self.v, 'h': self.h}
-                alter_rbm = models.rbm(params_i).to(cfg['device'])
-                v = torch.randn(self.num_samples, d, device=cfg['device'])
-                null_i = null_rbm(v, self.num_iters)
-                alter_i = alter_rbm(v, self.num_iters)
-                null.append(null_i.cpu())
-                alter.append(alter_i.cpu())
-                alter_W.append(alter_W_i.cpu())
-            null = torch.stack(null, dim=0)
-            alter = torch.stack(alter, dim=0)
-            alter_W = torch.stack(alter_W, dim=0)
-            null, alter = null.numpy(), alter.numpy()
-            meta = {'W': alter_W.numpy()}
-        return null, alter, meta
+            num_dims = self.v.size(0)
+            pre_W = self.W
+            pre_params = {'W': pre_W, 'v': self.v, 'h': self.h}
+            post_W = self.W + self.change_W * torch.randn(self.W.size())
+            post_params = {'W': post_W, 'v': self.v, 'h': self.h}
+            pre_rbm = models.rbm(pre_params).to(cfg['device'])
+            post_rbm = models.rbm(post_params).to(cfg['device'])
+            pre = torch.randn(self.num_trials * self.num_pre, num_dims, device=cfg['device'])
+            pre = pre_rbm(pre, self.num_iters)
+            pre = pre.view(self.num_trials, self.num_pre, -1)
+            post = torch.randn(self.num_trials * (self.num_total - self.num_pre), num_dims, device=cfg['device'])
+            post = post_rbm(post, self.num_iters)
+            post = post.view(self.num_trials, self.num_total - self.num_pre, -1)
+            pre, post = pre.cpu().numpy(), post.cpu().numpy()
+            meta = {'pre': {'W': pre_W.cpu().numpy(), 'v': self.v.cpu().numpy(), 'h': self.h.cpu().numpy()},
+                    'post': {'W': post_W.cpu().numpy(), 'v': self.v.cpu().numpy(), 'h': self.h.cpu().numpy()}}
+        return pre, post, meta

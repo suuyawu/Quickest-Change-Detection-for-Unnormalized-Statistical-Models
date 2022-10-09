@@ -1,3 +1,3 @@
 from .mvn import *
-# from .exp import *
-# from .rbm import *
+from .exp import *
+from .rbm import *

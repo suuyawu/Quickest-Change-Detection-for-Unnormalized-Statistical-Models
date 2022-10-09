@@ -37,6 +37,7 @@ def unnormalized_pdf_exp_nquad(*x):
         raise ValueError('Not valid d')
     return u_pdf
 
+
 class EXP(nn.Module):
     def __init__(self, power, tau, num_dims):
         super().__init__()

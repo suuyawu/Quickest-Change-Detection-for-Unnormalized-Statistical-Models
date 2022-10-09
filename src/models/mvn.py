@@ -4,6 +4,7 @@ import torch.nn as nn
 from torch.distributions.normal import Normal
 from torch.distributions.multivariate_normal import MultivariateNormal
 
+
 class MVN(nn.Module):
     def __init__(self, mean, logvar):
         super().__init__()
@@ -55,6 +56,7 @@ class MVN(nn.Module):
         t1 = t1.diagonal(dim1=-2, dim2=-1)
         hscore_ = t1 + t2
         return hscore_
+
 
 def mvn(params):
     mean = params['mean']
