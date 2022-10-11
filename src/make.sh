@@ -23,14 +23,23 @@ python make.py --mode mvn-logvar --run test --resume_mode 0 --num_gpus 4 --round
 # mvn-logvar-arl
 python make.py --mode mvn-logvar-arl --run test --resume_mode 0 --num_gpus 4 --round 16 --num_experiments 1
 
+# mvn-logvar-noise
+python make.py --mode mvn-logvar-noise --run test --resume_mode 0 --num_gpus 4 --round 16 --num_experiments 1
+
 # exp-tau
 python make.py --mode exp-tau --run test --resume_mode 0 --num_gpus 4 --round 16 --num_experiments 1
 
 # exp-tau-arl
 python make.py --mode exp-tau-arl --run test --resume_mode 0 --num_gpus 4 --round 16 --num_experiments 1
 
+# exp-tau-noise
+python make.py --mode exp-tau-noise --run test --resume_mode 0 --num_gpus 4 --round 16 --num_experiments 1
+
 # rbm-W
 python make.py --mode rbm-W --run test --resume_mode 0 --num_gpus 4 --round 16 --num_experiments 1
 
 # rbm-W-arl
 python make.py --mode rbm-W-arl --run test --resume_mode 0 --num_gpus 4 --round 16 --num_experiments 1
+
+# rbm-W-noise
+python make.py --mode rbm-W-noise --run test --resume_mode 0 --num_gpus 4 --round 16 --num_experiments 1
