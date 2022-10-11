@@ -60,7 +60,7 @@ def main():
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['500']
+        arl = ['2000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         mvn_mean_controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode,
                                           control_name)
@@ -77,7 +77,7 @@ def main():
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['500']
+        arl = ['2000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         mvn_logvar_controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode,
                                             control_name)
@@ -93,7 +93,7 @@ def main():
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['500']
+        arl = ['2000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         exp_tau_controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode,
                                          control_name)
@@ -109,7 +109,7 @@ def main():
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['500']
+        arl = ['2000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         rbm_W_controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode,
                                        control_name)
@@ -128,10 +128,149 @@ def main():
             change_i = '{}-{}'.format(change_mean_i, change_logvar)
             change.append(change_i)
         noise = ['0']
-        test_mode = ['cusum', 'scanb', 'scusum']
-        arl = ['500', '1000', '1500', '2000', '2500', '5000', '7500', '10000', '15000', '20000']
+        test_mode = ['cusum', 'scusum', 'scanb']
+        arl = ['2000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode, control_name)
+    elif mode == 'mvn-mean-arl':
+        script_name = [['{}_cpd.py'.format(run)]]
+        data_names = ['MVN-2']
+        num_pre = ['500']
+        num_post = ['10000']
+        change = []
+        change_mean = [0.5]
+        change_logvar = float(0)
+        for i in range(len(change_mean)):
+            change_mean_i = float(change_mean[i])
+            change_i = '{}-{}'.format(change_mean_i, change_logvar)
+            change.append(change_i)
+        noise = ['0']
+        test_mode = ['cusum', 'scusum', 'scanb']
+        arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
+        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode, control_name)
+    elif mode == 'mvn-mean-noise':
+        script_name = [['{}_cpd.py'.format(run)]]
+        data_names = ['MVN-2']
+        num_pre = ['500']
+        num_post = ['10000']
+        change = []
+        change_mean = [0.5]
+        change_logvar = float(0)
+        for i in range(len(change_mean)):
+            change_mean_i = float(change_mean[i])
+            change_i = '{}-{}'.format(change_mean_i, change_logvar)
+            change.append(change_i)
+        noise = ['0.005', '0.01', '0.05', '0.1', '0.5', '1', '3', '5']
+        test_mode = ['cusum', 'scusum', 'scanb']
+        arl = ['2000']
+        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode, control_name)
+    elif mode == 'mvn-logvar':
+        script_name = [['{}_cpd.py'.format(run)]]
+        data_names = ['MVN-2']
+        num_pre = ['500']
+        num_post = ['10000']
+        change = []
+        change_mean = float(0)
+        change_logvar = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8,
+                         0.85, 0.9, 0.95, 1]
+        for i in range(len(change_logvar)):
+            change_logvar_i = float(change_logvar[i])
+            change_i = '{}-{}'.format(change_mean, change_logvar_i)
+            change.append(change_i)
+        noise = ['0']
+        test_mode = ['cusum', 'scusum', 'scanb']
+        arl = ['2000']
+        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode, control_name)
+    elif mode == 'mvn-logvar-arl':
+        script_name = [['{}_cpd.py'.format(run)]]
+        data_names = ['MVN-2']
+        num_pre = ['500']
+        num_post = ['10000']
+        change = []
+        change_mean = float(0)
+        change_logvar = [0.5]
+        for i in range(len(change_logvar)):
+            change_logvar_i = float(change_logvar[i])
+            change_i = '{}-{}'.format(change_mean, change_logvar_i)
+            change.append(change_i)
+        noise = ['0']
+        test_mode = ['cusum', 'scusum', 'scanb']
+        arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
+        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode, control_name)
+    elif mode == 'exp-tau':
+        script_name = [['{}_cpd.py'.format(run)]]
+        data_names = ['EXP-2']
+        num_pre = ['500']
+        num_post = ['10000']
+        change = []
+        change_tau = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
+                      2.0]
+        for i in range(len(change_tau)):
+            change_tau_i = float(change_tau[i])
+            change_i = '{}'.format(change_tau_i)
+            change.append(change_i)
+        noise = ['0']
+        test_mode = ['cusum', 'scusum', 'scanb']
+        arl = ['2000']
+        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode,
+                                         control_name)
+    elif mode == 'exp-tau-arl':
+        script_name = [['{}_cpd.py'.format(run)]]
+        data_names = ['EXP-2']
+        num_pre = ['500']
+        num_post = ['10000']
+        change = []
+        change_tau = [1.0]
+        for i in range(len(change_tau)):
+            change_tau_i = float(change_tau[i])
+            change_i = '{}'.format(change_tau_i)
+            change.append(change_i)
+        noise = ['0']
+        test_mode = ['cusum', 'scusum', 'scanb']
+        arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
+        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode,
+                                         control_name)
+    elif mode == 'rbm-W':
+        script_name = [['{}_cpd.py'.format(run)]]
+        data_names = ['RBM-50']
+        num_pre = ['500']
+        num_post = ['10000']
+        change = []
+        change_W = [0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07,
+                    0.075, 0.08, 0.085, 0.09, 0.095, 0.1]
+        for i in range(len(change_W)):
+            change_W_i = float(change_W[i])
+            change_i = '{}'.format(change_W_i)
+            change.append(change_i)
+        noise = ['0']
+        test_mode = ['scusum', 'scanb']
+        arl = ['2000']
+        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode,
+                                       control_name)
+    elif mode == 'rbm-W-arl':
+        script_name = [['{}_cpd.py'.format(run)]]
+        data_names = ['RBM-50']
+        num_pre = ['500']
+        num_post = ['10000']
+        change = []
+        change_W = [0.05]
+        for i in range(len(change_W)):
+            change_W_i = float(change_W[i])
+            change_i = '{}'.format(change_W_i)
+            change.append(change_i)
+        noise = ['0']
+        test_mode = ['scusum', 'scanb']
+        arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
+        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode,
+                                       control_name)
     else:
         raise ValueError('Not valid mode')
     s = '#!/bin/bash\n'

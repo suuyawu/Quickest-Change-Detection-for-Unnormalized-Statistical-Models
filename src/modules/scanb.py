@@ -105,7 +105,7 @@ class SCANB:
         ])
 
         if len(self.current_window) < ws:
-            return self.stop
+            return 0, False
         else:
             if len(self.current_window) > ws:
                 del self.current_window[0]

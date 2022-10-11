@@ -116,7 +116,7 @@ def process_control():
     data_name_list = cfg['control']['data_name'].split('-')
     cfg['data_name'], cfg['num_dims'] = data_name_list[0], int(data_name_list[1])
     cfg['num_pre'] = int(cfg['control']['num_pre'])
-    cfg['num_total'] = int(cfg['control']['num_total'])
+    cfg['num_post'] = int(cfg['control']['num_post'])
     cfg['change'] = cfg['control']['change']
     cfg['noise'] = float(cfg['control']['noise'])
     cfg['test_mode'] = cfg['control']['test_mode']
@@ -260,7 +260,7 @@ def make_params(data_name):
         logvar = cfg['MVN']['logvar']
         change_mean, change_logvar = cfg['change'].split('-')
         change_mean, change_logvar = float(change_mean), float(change_logvar)
-        params = {'data_name': data_name, 'num_pre': cfg['num_pre'], 'num_total': cfg['num_total'],
+        params = {'data_name': data_name, 'num_pre': cfg['num_pre'], 'num_post': cfg['num_post'],
                   'num_trials': cfg['num_trials'], 'mean': mean, 'logvar': logvar,
                   'change_mean': change_mean, 'change_logvar': change_logvar}
     elif data_name == 'EXP':
@@ -268,7 +268,7 @@ def make_params(data_name):
         tau = cfg['EXP']['tau']
         num_dims = cfg['EXP']['num_dims']
         change_tau = float(cfg['change'])
-        params = {'data_name': data_name, 'num_pre': cfg['num_pre'], 'num_total': cfg['num_total'],
+        params = {'data_name': data_name, 'num_pre': cfg['num_pre'], 'num_post': cfg['num_post'],
                   'num_trials': cfg['num_trials'], 'power': power, 'tau': tau, 'num_dims': num_dims,
                   'change_tau': change_tau}
     elif data_name == 'RBM':
@@ -277,7 +277,7 @@ def make_params(data_name):
         h = cfg['RBM']['h']
         num_iters = cfg['RBM']['num_iters']
         change_W = float(cfg['change'])
-        params = {'data_name': data_name, 'num_pre': cfg['num_pre'], 'num_total': cfg['num_total'],
+        params = {'data_name': data_name, 'num_pre': cfg['num_pre'], 'num_post': cfg['num_post'],
                   'num_trials': cfg['num_trials'], 'W': W, 'v': v, 'h': h, 'num_iters': num_iters, 'change_W': change_W}
     else:
         raise ValueError('Not valid data name')

@@ -8,10 +8,7 @@ def EDD(cp, pre_data, post_data):
     with torch.no_grad():
         target_cp = len(pre_data)
         N = len(pre_data) + len(post_data)
-        if cp < target_cp:
-            edd = N - target_cp
-        else:
-            edd = cp - target_cp
+        edd = cp - target_cp
     return edd
 
 

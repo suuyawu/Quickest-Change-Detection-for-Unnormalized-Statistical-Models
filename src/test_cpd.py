@@ -41,7 +41,7 @@ def runExperiment():
     process_dataset(dataset)
     metric = Metric({'test': ['EDD']})
     data_loader = make_data_loader(dataset, 'cpd')
-    cpd = ChangePointDetecion(cfg['test_mode'], cfg['arl'], cfg['noise'])
+    cpd = ChangePointDetecion(cfg['test_mode'], cfg['arl'], cfg['noise'], dataset['test'])
     logger = make_logger(os.path.join('output', 'runs', 'test_{}'.format(cfg['model_tag'])))
     test(data_loader['test'], cpd, metric, logger)
     result = {'cfg': cfg, 'logger': logger, 'cpt': cpd}
@@ -52,15 +52,10 @@ def runExperiment():
 def test(data_loader, cpd, metric, logger):
     start_time = time.time()
     for i, input in enumerate(data_loader):
-        # s = time.time()
         logger.save(True)
         input = collate(input)
         input = to_device(input, cfg['device'])
-        # print(time.time() - s)
-        # s = time.time()
         output = cpd.test(input)
-        # print(time.time() - s)
-        # s = time.time()
         evaluation = metric.evaluate(metric.metric_name['test'], input, output)
         logger.append(evaluation, 'test', 1)
         if i % np.ceil((len(data_loader) * cfg['log_interval'])) == 0:

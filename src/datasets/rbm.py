@@ -13,7 +13,7 @@ class RBM(Dataset):
         super().__init__()
         self.root = os.path.expanduser(root)
         self.num_pre = params['num_pre']
-        self.num_total = params['num_total']
+        self.num_post = params['num_post']
         self.num_trials = params['num_trials']
         self.W = params['W']
         self.v = params['v']
@@ -79,9 +79,9 @@ class RBM(Dataset):
             pre = torch.randn(self.num_trials * self.num_pre, num_dims, device=cfg['device'])
             pre = pre_rbm(pre, self.num_iters)
             pre = pre.view(self.num_trials, self.num_pre, -1)
-            post = torch.randn(self.num_trials * (self.num_total - self.num_pre), num_dims, device=cfg['device'])
+            post = torch.randn(self.num_trials * self.num_post, num_dims, device=cfg['device'])
             post = post_rbm(post, self.num_iters)
-            post = post.view(self.num_trials, self.num_total - self.num_pre, -1)
+            post = post.view(self.num_trials, self.num_post, -1)
             pre, post = pre.cpu().numpy(), post.cpu().numpy()
             meta = {'pre': {'W': pre_W.cpu().numpy(), 'v': self.v.cpu().numpy(), 'h': self.h.cpu().numpy()},
                     'post': {'W': post_W.cpu().numpy(), 'v': self.v.cpu().numpy(), 'h': self.h.cpu().numpy()}}

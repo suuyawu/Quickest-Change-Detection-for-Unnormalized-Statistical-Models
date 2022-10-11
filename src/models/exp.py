@@ -49,7 +49,7 @@ class EXP(nn.Module):
         self.tau = nn.Parameter(tau)
         self.register_buffer('num_dims', num_dims)
         self.params = {'power': power, 'tau': tau, 'num_dims': num_dims}
-        if 'lrt' in cfg['test_mode']:
+        if cfg['test_mode'] in ['cusum']:
             nc_name = 'nc_{}_{}'.format(self.tau.data.item(), num_dims.item())
             if nc_name not in cfg:
                 cfg[nc_name] = integrate.nquad(unnormalized_pdf_exp_nquad,

@@ -11,7 +11,7 @@ class MVN(Dataset):
         super().__init__()
         self.root = os.path.expanduser(root)
         self.num_pre = params['num_pre']
-        self.num_total = params['num_total']
+        self.num_post = params['num_post']
         self.num_trials = params['num_trials']
         self.mean = params['mean']
         self.logvar = params['logvar']
@@ -71,7 +71,7 @@ class MVN(Dataset):
         post_mean = self.mean + self.change_mean
         post_logvar = self.logvar + self.change_logvar * torch.eye(num_dims)
         post_mvn = torch.distributions.multivariate_normal.MultivariateNormal(post_mean, post_logvar.exp())
-        post = post_mvn.sample((self.num_trials, self.num_total - self.num_pre))
+        post = post_mvn.sample((self.num_trials, self.num_post))
         pre, post = pre.numpy(), post.numpy()
         meta = {'pre': {'mean': pre_mean.numpy(), 'logvar': pre_logvar.numpy()},
                 'post': {'mean': post_mean.numpy(), 'logvar': post_logvar.numpy()}}

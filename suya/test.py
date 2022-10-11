@@ -128,7 +128,7 @@ def experiment(hyper_threshold, num_trials, Figure1=True):
             plt.savefig('./figure1.pdf', bbox_inches='tight')
             plt.close()
     print(edds_scanb)
-
+    exit()
     # edds_cusum = [item for item in edds_cusum if item >=0]
     # edds_cusumf = [item for item in edds_cusumf if item >=0]
     # edds_srp = [item for item in edds_srp if item >=0]

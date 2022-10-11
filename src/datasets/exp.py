@@ -12,7 +12,7 @@ class EXP(Dataset):
         super().__init__()
         self.root = os.path.expanduser(root)
         self.num_pre = params['num_pre']
-        self.num_total = params['num_total']
+        self.num_post = params['num_post']
         self.num_trials = params['num_trials']
         self.power = params['power']
         self.tau = params['tau']
@@ -111,11 +111,11 @@ class EXP(Dataset):
         post_power = self.power
         post_tau = self.tau + self.change_tau
         post_nuts = NUTS(potential_fn=lambda x: -torch.log(unnormalized_pdf_exp(x, post_power, post_tau)))
-        mcmc = MCMC(post_nuts, num_samples=num_sampling_set * (self.num_total - self.num_pre),
+        mcmc = MCMC(post_nuts, num_samples=num_sampling_set * self.num_post,
                     initial_params={'u': torch.zeros((num_dims,))})
         mcmc.run()
         post = mcmc.get_samples()['u']
-        randidx = torch.randint(0, post.shape[0], (self.num_trials, self.num_total - self.num_pre))
+        randidx = torch.randint(0, post.shape[0], (self.num_trials, self.num_post))
         post = post[randidx]
         pre, post = pre.numpy(), post.numpy()
         meta = {'pre': {'power': pre_power.numpy(), 'tau': pre_tau.numpy(), 'num_dims': num_dims.numpy()},
