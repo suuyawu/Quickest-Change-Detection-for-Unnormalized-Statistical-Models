@@ -59,6 +59,7 @@ class SCANB:
         ))
 
     def _initialise(self):
+        self.detect = False
         self.stop = False
         self.t = 0
         self.current_window = []
@@ -105,7 +106,7 @@ class SCANB:
         ])
 
         if len(self.current_window) < ws:
-            return 0, False
+            return 0, False, self.threshold
         else:
             if len(self.current_window) > ws:
                 del self.current_window[0]

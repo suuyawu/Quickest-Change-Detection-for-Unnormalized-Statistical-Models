@@ -34,7 +34,7 @@ class CALM():
         self._initialise()
 
     def _initialise(self):
-        self.detected = False
+        self.detect = False
         self.t = 0
         self.current_window = []
         self.k_xys = []
@@ -96,15 +96,16 @@ class CALM():
         self.k_xys.append(self.kernel(self.initial_data[self.ref_inds], x[None, :]))
 
         if (len(self.current_window) < self.window_size) or (self.t % self.test_every_k != 0):
-            return self.detected
+            threshold_ind = min(self.t - self.window_size, self.window_size - 1)
+            threshold = self.thresholds[threshold_ind]
+            return 0, False, threshold
         else:
             self.current_window = self.current_window[-self.window_size:]
             self.k_xys = self.k_xys[-self.window_size:]
 
             cur_win = torch.stack(self.current_window, axis=0)
             k_xy = torch.stack(self.k_xys, axis=0)
-            k_yy = self.kernel(cur_win)
-
+            k_yy = self.kernel(cur_win).squeeze(dim=-1)
             mmd = (
                     self.k_xx_sum +
                     zero_diag(k_yy).sum() / (self.window_size * (self.window_size - 1)) -
@@ -114,7 +115,7 @@ class CALM():
             threshold_ind = min(self.t - self.window_size, self.window_size - 1)
             threshold = self.thresholds[threshold_ind]
             if mmd > threshold:
-                self.detected = True
+                self.detect = True
             else:
                 self.detect = False
             return mmd, self.detect, threshold

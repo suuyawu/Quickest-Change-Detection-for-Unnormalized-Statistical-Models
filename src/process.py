@@ -235,8 +235,8 @@ def main():
     df_mean = make_df(processed_result, 'mean')
     df_history = make_df(processed_result, 'history')
     # make_vis_runtime()
-    make_vis_score(df_history)
-    # make_vis_change(df_mean)
+    # make_vis_score(df_history)
+    make_vis_change(df_mean)
     # make_vis_arl(df_mean)
     # make_vis_noise(df_mean)
     return
@@ -332,15 +332,15 @@ def make_df(processed_result, mode):
 
 
 def make_vis_runtime():
-    label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'ScanB'}
-    color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue'}
-    linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':'}
-    marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p'}
+    label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'ScanB', 'calm': 'CALM'}
+    color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue', 'calm': 'cyan'}
+    linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':', 'calm': (0, (5, 5))}
+    marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p', 'calm': 's'}
     fontsize_dict = {'legend': 16, 'label': 16, 'ticks': 16}
     loc_dict = {'runtime': 'upper left'}
     figsize = (5, 4)
     num_experiments = 1
-    num_dims = 3
+    num_dims = 4
     num_dims = list(range(1, num_dims + 1))
     runtime = []
     for i in range(num_experiments):
@@ -351,9 +351,11 @@ def make_vis_runtime():
     for label in runtime[0]:
         runtime_ = np.array([runtime[i][label] for i in range(num_experiments)])
         runtime_mean = runtime_.mean(axis=0)
-        runtime_std = runtime_.std(axis=0)
-        ax_1.errorbar(num_dims, runtime_mean, yerr=runtime_std / 2, color=color_dict[label],
-                      linestyle=linestyle_dict[label], label=label_dict[label], marker=marker_dict[label])
+        # runtime_std = runtime_.std(axis=0)
+        # ax_1.errorbar(num_dims, runtime_mean, yerr=runtime_std / 2, color=color_dict[label],
+        #               linestyle=linestyle_dict[label], label=label_dict[label], marker=marker_dict[label])
+        ax_1.plot(num_dims, runtime_mean, color=color_dict[label],
+                  linestyle=linestyle_dict[label], label=label_dict[label], marker=marker_dict[label])
     ax_1.set_xlabel('Dimension', fontsize=fontsize_dict['label'])
     ax_1.set_ylabel('CPU Time (s)', fontsize=fontsize_dict['label'])
     ax_1.set_xticks(num_dims)
@@ -373,11 +375,13 @@ def make_vis_runtime():
 
 
 def make_vis_score(df_history):
-    label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'ScanB', 'threshold': 'Threshold',
-                  'cp': 'Change Point'}
-    color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue', 'threshold': 'orange', 'cp': 'green'}
-    linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':', 'threshold': '-.', 'cp': (0, (1, 5))}
-    marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p'}
+    label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'ScanB', 'calm': 'CALM',
+                  'threshold': 'Threshold', 'cp': 'Change Point'}
+    color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue', 'calm': 'cyan',
+                  'threshold': 'orange', 'cp': 'green'}
+    linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':', 'calm': '-.', 'threshold': (0, (5, 5)),
+                      'cp': (0, (10, 5))}
+    marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p', 'calm': 's'}
     fontsize_dict = {'legend': 16, 'label': 16, 'ticks': 16}
     loc_dict = {'score': 'lower right'}
     fig = {}
@@ -419,7 +423,7 @@ def make_vis_score(df_history):
                 x = range(1, len(cusum) + 1)
                 ax_1 = ax_dict_1[fig_name]
                 xlabel = 'Time Step'
-                ylabel = 'Statistic'
+                ylabel = 'Detection Score'
                 pivot = 'cusum'
                 ax_1.plot(x, cusum, label=label_dict[pivot], color=color_dict[pivot],
                           linestyle=linestyle_dict[pivot])
@@ -443,7 +447,7 @@ def make_vis_score(df_history):
                 x = range(1, len(scusum) + 1)
                 ax_2 = ax_dict_2[fig_name]
                 xlabel = 'Time Step'
-                ylabel = 'Statistic'
+                ylabel = 'Detection Score'
                 pivot = 'scusum'
                 ax_2.plot(x, scusum, label=label_dict[pivot], color=color_dict[pivot],
                           linestyle=linestyle_dict[pivot])
@@ -467,7 +471,7 @@ def make_vis_score(df_history):
                 x = range(1, len(scanb) + 1)
                 ax_3 = ax_dict_3[fig_name]
                 xlabel = 'Time Step'
-                ylabel = 'Statistic'
+                ylabel = 'Detection Score'
                 pivot = 'scanb'
                 ax_3.plot(x, scanb, label=label_dict[pivot], color=color_dict[pivot],
                           linestyle=linestyle_dict[pivot])
@@ -507,7 +511,7 @@ def make_vis_score(df_history):
                 x = range(1, len(scusum) + 1)
                 ax_1 = ax_dict_1[fig_name]
                 xlabel = 'Time Step'
-                ylabel = 'Statistic'
+                ylabel = 'Detection Score'
                 pivot = 'scusum'
                 ax_1.plot(x, scusum, label=label_dict[pivot], color=color_dict[pivot],
                           linestyle=linestyle_dict[pivot])
@@ -530,7 +534,7 @@ def make_vis_score(df_history):
 
                 ax_2 = ax_dict_2[fig_name]
                 xlabel = 'Time Step'
-                ylabel = 'Statistic'
+                ylabel = 'Detection Score'
                 pivot = 'scanb'
                 ax_2.plot(x, scanb, label=label_dict[pivot], color=color_dict[pivot],
                           linestyle=linestyle_dict[pivot])
@@ -567,10 +571,10 @@ def make_vis_score(df_history):
 
 
 def make_vis_change(df_mean):
-    label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'ScanB'}
-    color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue'}
-    linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':'}
-    marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p'}
+    label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'ScanB', 'calm': 'CALM'}
+    color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue', 'calm': 'cyan'}
+    linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':', 'calm': '-.'}
+    marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p', 'calm': 's'}
     fontsize_dict = {'legend': 16, 'label': 16, 'ticks': 16}
     loc_dict = {'change': 'upper right'}
     fig_names = tree()
@@ -649,10 +653,10 @@ def make_vis_change(df_mean):
 
 
 def make_vis_arl(df_mean):
-    label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'ScanB'}
-    color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue'}
-    linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':'}
-    marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p'}
+    label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'ScanB', 'calm': 'CALM'}
+    color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue', 'calm': 'cyan'}
+    linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':', 'calm': '-.'}
+    marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p', 'calm': 's'}
     fontsize_dict = {'legend': 16, 'label': 16, 'ticks': 16}
     loc_dict = {'arl': 'upper right'}
     fig_names = tree()
@@ -769,10 +773,10 @@ def make_vis_arl(df_mean):
 
 
 def make_vis_noise(df_mean):
-    label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'ScanB'}
-    color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue'}
-    linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':'}
-    marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p'}
+    label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'ScanB', 'calm': 'CALM'}
+    color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue', 'calm': 'cyan'}
+    linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':', 'calm': '-.'}
+    marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p', 'calm': 's'}
     fontsize_dict = {'legend': 16, 'label': 16, 'ticks': 16}
     loc_dict = {'noise': 'upper right'}
     fig_names = tree()

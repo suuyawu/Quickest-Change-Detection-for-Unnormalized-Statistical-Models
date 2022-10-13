@@ -26,7 +26,7 @@ def main():
     pivot_data_name = 'EXP'
     num_dims = 4
     data_names = ['{}-{}'.format(pivot_data_name, x + 1) for x in range(num_dims)]
-    test_modes = ['cusum', 'scusum', 'scanb']
+    test_modes = ['cusum', 'scusum', 'scanb', 'calm']
     runtime = defaultdict(list)
     cfg['control']['change'] = '1.0'
     for data_name in data_names:

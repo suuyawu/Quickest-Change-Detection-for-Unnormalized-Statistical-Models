@@ -28,7 +28,7 @@ class CUSUM:
             self.detect = True
         else:
             self.detect = False
-        return self.detector_score, self.detect
+        return self.detector_score, self.detect, self.threshold
 
     def nll(self, sample, pre_pdf, post_pdf):
         """Calculate instant Negative Log Likelihood"""

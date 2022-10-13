@@ -40,7 +40,7 @@ class SCUSUM:
             self.detect = True
         else:
             self.detect = False
-        return self.detector_score, self.detect
+        return self.detector_score, self.detect, self.threshold
 
     def hst(self, sample, pre_hscore, post_hscore):
         """Calculate instant Hyvarinen Score Difference"""

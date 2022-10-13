@@ -4,24 +4,18 @@ from config import cfg
 from utils import recur
 
 
-def EDD(cp, pre_data, post_data):
+def CADD(cp, pre_data, post_data):
     with torch.no_grad():
         target_cp = len(pre_data)
         N = len(pre_data) + len(post_data)
-        edd = cp - target_cp
-    return edd
-
-
-def RMSE(output, target):
-    with torch.no_grad():
-        rmse = F.mse_loss(output, target).sqrt().item()
-    return rmse
+        cadd = cp - target_cp
+    return cadd
 
 
 class Metric(object):
     def __init__(self, metric_name):
         self.metric_name = self.make_metric_name(metric_name)
-        self.metric = {'EDD': (lambda input, output: EDD(output['cp'], input['pre_data'], input['post_data']))}
+        self.metric = {'CADD': (lambda input, output: CADD(output['cp'], input['pre_data'], input['post_data']))}
         self.reset()
 
     def make_metric_name(self, metric_name):
