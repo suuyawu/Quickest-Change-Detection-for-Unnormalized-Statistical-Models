@@ -7,7 +7,7 @@ class SCUSUM:
     def __init__(self, arl, pre_data, pre_model):
         super().__init__()
         self.arl = arl
-        self.hyper_threshold = math.log(arl)
+        self.threshold = math.log(arl)
         self.hyper_lambda = self.make_hyper_lambda(pre_data, pre_model)
         self._initialize()
 
@@ -36,7 +36,7 @@ class SCUSUM:
         self.detector_score = max((self.detector_score + inst_hst).item(), 0)
         self.cum_hst.append(inst_hst.item())
         self.cum_scores.append(self.detector_score)
-        if self.detector_score > self.hyper_threshold:
+        if self.detector_score > self.threshold:
             self.detect = True
         else:
             self.detect = False

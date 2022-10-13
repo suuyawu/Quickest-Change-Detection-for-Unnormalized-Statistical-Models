@@ -1,7 +1,7 @@
 ---
 # control
 control:
-  data_name: MVN
+  data_name: MVN-2
   num_pre: 500
   num_post: 10000
   change: 0.1-0
@@ -13,7 +13,7 @@ num_workers: 0
 init_seed: 0
 num_experiments: 1
 log_interval: 0.25
-device: cuda
+device: cpu
 world_size: 1
 resume_mode: 0
 verbose: False

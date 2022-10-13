@@ -44,7 +44,8 @@ def runExperiment():
     cpd = ChangePointDetecion(cfg['test_mode'], cfg['arl'], cfg['noise'], dataset['test'])
     logger = make_logger(os.path.join('output', 'runs', 'test_{}'.format(cfg['model_tag'])))
     test(data_loader['test'], cpd, metric, logger)
-    result = {'cfg': cfg, 'logger': logger, 'cpt': cpd}
+    cpd.clean()
+    result = {'cfg': cfg, 'logger': logger, 'cpd': cpd}
     save(result, os.path.join('output', 'result', '{}.pt'.format(cfg['model_tag'])))
     return
 

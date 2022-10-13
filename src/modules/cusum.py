@@ -5,7 +5,7 @@ class CUSUM:
     def __init__(self, arl):
         super().__init__()
         self.arl = arl
-        self.hyper_threshold = math.log(arl)
+        self.threshold = math.log(arl)
         self._initialize()
 
     def _reset(self):
@@ -24,7 +24,7 @@ class CUSUM:
         self.detector_score = max((self.detector_score + inst_nll).item(), 0)
         self.cum_nll.append(inst_nll.item())
         self.cum_scores.append(self.detector_score)
-        if self.detector_score > self.hyper_threshold:
+        if self.detector_score > self.threshold:
             self.detect = True
         else:
             self.detect = False

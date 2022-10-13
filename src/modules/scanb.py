@@ -117,12 +117,12 @@ class SCANB:
 
             mmds = self.k_xx_sums + k_yy_sum - 2 * k_xy_sums
             distance = mmds.mean() / self.std
-
+            distance = distance.item()
             if distance > self.threshold:
                 self.detect = True
             else:
                 self.detect = False
-            return distance, self.detect
+            return distance, self.detect, self.threshold
 
 
 def estimate_variance_from_kernel_mat(
