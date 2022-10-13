@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 from models import MVN
-from modules import CUSUM, CUSUMF, SRP, B_Stat
+from modules import CUSUM, CUSUMF, B_Stat
 
 from modules.utils import GaussianRBF, Kernel
 
@@ -162,3 +162,12 @@ plt.ylabel(r"$\mathbb{E}_{\nu}[T-\nu|T\geq \nu]$")
 plt.legend()
 plt.savefig('./figure2.pdf', bbox_inches='tight')
 plt.close()
+
+
+x = np.linspace(-5,5,100)
+pdf = np.array(null_model.pdf(torch.tensor(x)).detach().cpu())
+gradient = np.array(null_model.pdf(x).detach().cpu())
+logpdf = null_model.score(torch.tensor(x))
+plt.plot(x, pdf)
+plt.plot(x, logpdf)
+plt.show()

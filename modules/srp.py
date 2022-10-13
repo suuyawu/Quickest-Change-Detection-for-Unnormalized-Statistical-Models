@@ -21,7 +21,7 @@ class SRP:
     def _update(self, sample, null_model, alter_model):
         self.stopping_time += 1
         inst_sr = self.lr(sample, null_model.pdf, alter_model.pdf)
-        self.detector_score = max(1,self.detector_score)*inst_sr.item()
+        self.detector_score = max(1., self.detector_score)*inst_sr.item()
         self.cum_lr.append(inst_sr.item())
         self.cum_scores.append(self.detector_score)
         if self.detector_score > self.hyper_threshold:
