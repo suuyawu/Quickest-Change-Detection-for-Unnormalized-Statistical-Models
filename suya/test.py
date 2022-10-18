@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 from models import MVN
-from modules import CUSUM, CUSUMF, B_Stat
+from modules import CUSUM, CUSUMF, B_Stat, SRP
 
 from modules.utils import GaussianRBF, Kernel
 
@@ -33,7 +33,8 @@ def detection_procedure(detector, samples, change_point, null_model, alter_model
         t += 1
         new_x = next(sample_stream)
         detector._update(new_x.reshape(1, -1), null_model, alter_model)
-    return t-change_point
+    if t>change_point:
+        return t-change_point
 
 #Model definition and Data Generation
 # mean = torch.tensor([0.]*20)
@@ -45,12 +46,12 @@ logvar = torch.tensor([[0., 1.], [1., 5.]])
 ptb_mean = 1 * torch.randn(mean.size())
 alter_mean = mean + ptb_mean
 
-change_point = 500
+change_point = 10
 total_length = 10000
 
 null_mvn = torch.distributions.multivariate_normal.MultivariateNormal(mean, logvar.exp())
 null_model  = MVN(mean, logvar)
-initial_data = null_mvn.sample((change_point,))
+initial_data = null_mvn.sample((1000,))
 
 alter_mvn = torch.distributions.multivariate_normal.MultivariateNormal(alter_mean, logvar.exp())
 alter_model  = MVN(alter_mean, logvar)
@@ -128,7 +129,6 @@ def experiment(hyper_threshold, num_trials, Figure1=True):
             plt.savefig('./figure1.pdf', bbox_inches='tight')
             plt.close()
     print(edds_scanb)
-
     # edds_cusum = [item for item in edds_cusum if item >=0]
     # edds_cusumf = [item for item in edds_cusumf if item >=0]
     # edds_srp = [item for item in edds_srp if item >=0]

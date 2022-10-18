@@ -1,0 +1,19 @@
+---
+# control
+control:
+  data_name: MVN-2
+  num_pre: 500
+  num_post: 10000
+  change: 0.1-0
+  noise: 0
+  test_mode: scusum
+  arl: 2000
+# experiment
+num_workers: 0
+init_seed: 0
+num_experiments: 1
+log_interval: 0.25
+device: cuda
+world_size: 1
+resume_mode: 0
+verbose: False
