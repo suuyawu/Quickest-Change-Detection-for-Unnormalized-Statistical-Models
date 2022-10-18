@@ -239,10 +239,10 @@ def main():
     processed_result = process_result(controls)
     df_mean = make_df(processed_result, 'mean')
     df_history = make_df(processed_result, 'history')
-    # make_vis_runtime()
-    # make_vis_score(df_history)
-    # make_vis_change(df_mean)
-    # make_vis_arl(df_mean)
+    make_vis_runtime()
+    make_vis_score(df_history)
+    make_vis_change(df_mean)
+    make_vis_arl(df_mean)
     make_vis_noise(df_mean)
     return
 
@@ -387,7 +387,7 @@ def make_vis_score(df_history):
                       'cp': (0, (10, 5))}
     marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p', 'calm': 's'}
     fontsize_dict = {'legend': 16, 'label': 16, 'ticks': 16}
-    loc_dict = {'score': 'lower right'}
+    loc_dict = {'score': 'upper right'}
     fig = {}
     ax_dict_1 = {}
     ax_dict_2 = {}
