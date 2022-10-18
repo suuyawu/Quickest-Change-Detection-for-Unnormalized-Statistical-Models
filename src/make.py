@@ -138,7 +138,7 @@ def main():
         num_pre = ['500']
         num_post = ['10000']
         change = []
-        change_mean = [0, 0.5]
+        change_mean = [0, 0.1]
         change_logvar = float(0)
         for i in range(len(change_mean)):
             change_mean_i = float(change_mean[i])
@@ -155,7 +155,7 @@ def main():
         num_pre = ['500']
         num_post = ['10000']
         change = []
-        change_mean = [0, 0.5]
+        change_mean = [0, 0.1]
         change_logvar = float(0)
         for i in range(len(change_mean)):
             change_mean_i = float(change_mean[i])

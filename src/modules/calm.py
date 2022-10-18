@@ -114,6 +114,7 @@ class CALM():
 
             threshold_ind = min(self.t - self.window_size, self.window_size - 1)
             threshold = self.thresholds[threshold_ind]
+            mmd = mmd.item()
             if mmd > threshold:
                 self.detect = True
             else:
