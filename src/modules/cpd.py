@@ -9,13 +9,13 @@ from .utils import load_kernel
 
 
 class ChangePointDetecion:
-    def __init__(self, test_mode, arl, noise, dataset, pre_length):
+    def __init__(self, test_mode, arl, noise, dataset, pre_length=None):
         self.test_mode = test_mode
         self.arl = arl
         self.noise = noise
         self.pre_length = pre_length
-        self.cpd = self.make_cpd(dataset)
         self.reset()
+        self.cpd = self.make_cpd(dataset)
 
     def reset(self):
         self.stats = {'score': [], 'detect': [], 'threshold': [], 'hyper_lambda': []}
@@ -28,15 +28,17 @@ class ChangePointDetecion:
     def make_cpd(self, dataset):
         pre_data = torch.tensor(dataset.pre)
         pre_data = pre_data.view(-1, pre_data.size(-1))
-        #To evaluate pre-data length
-        # pre_data = pre_data[torch.randperm(pre_data.size(0))][:dataset.pre.shape[1]].to(cfg['device'])
-        pre_data = pre_data[torch.randperm(self.pre_length)][:dataset.pre.shape[1]].to(cfg['device'])
+        if self.pre_length is None:
+            pre_data = pre_data[torch.randperm(pre_data.size(0))][:dataset.pre.shape[1]].to(cfg['device'])
+        else:
+            pre_data = pre_data[torch.randperm(pre_data.size(0))][:self.pre_length].to(cfg['device'])
         if self.test_mode == 'cusum':
             cpd = CUSUM(self.arl)
         elif self.test_mode == 'scusum':
             pre_param = dataset[0]['pre_param']
             pre_model = eval('models.{}(pre_param).to(cfg["device"])'.format(cfg['model_name']))
             cpd = SCUSUM(self.arl, pre_data, pre_model)
+            self.stats['lambda'] = cpd.hyper_lambda
         elif self.test_mode == 'scanb':
             cpd = SCANB(kernel=load_kernel('gaussian_rbf'), initial_data=pre_data, ert=self.arl, window_size=25,
                         test_every_k=1, n_samples=25000)
@@ -63,11 +65,10 @@ class ChangePointDetecion:
             post_model = None
         if self.test_mode in ['scusum']:
             for t, data_i in enumerate(data):
-                score, detect, threshold, hyper_lambda = self.cpd._update(data_i.reshape(1, -1), pre_model, post_model)
+                score, detect, threshold = self.cpd._update(data_i.reshape(1, -1), pre_model, post_model)
                 self.stats['score'].append(score)
                 self.stats['detect'].append(detect)
                 self.stats['threshold'].append(threshold)
-                self.stats['hyper_lambda'].append(hyper_lambda)
                 if cp == len(data) and detect and t > target_cp - 1:
                     cp = t + 1
         elif self.test_mode in ['cusum']:

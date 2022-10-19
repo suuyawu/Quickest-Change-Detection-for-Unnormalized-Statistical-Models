@@ -163,7 +163,7 @@ def main():
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['10000']
+        arl = ['2000']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode, control_name)
@@ -233,7 +233,7 @@ def main():
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['10000']
+        arl = ['2000']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode, control_name)
@@ -300,7 +300,7 @@ def main():
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['10000']
+        arl = ['2000']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode, control_name)
@@ -366,7 +366,7 @@ def main():
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['20000']
+        arl = ['2000']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode, control_name)
