@@ -26,8 +26,7 @@ class SCUSUM:
             hs = pre_model.hscore(pre_data).detach().cpu().numpy()
             out = np.exp(x * hs).mean() - 1
             return [out]
-
-        hyper_lambda = fsolve(func, [1])[0]
+        hyper_lambda = fsolve(func, [10])[0]
         return hyper_lambda
 
     def _update(self, sample, pre_model, post_model):

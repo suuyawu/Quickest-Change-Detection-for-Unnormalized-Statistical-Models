@@ -43,7 +43,7 @@ def runExperiment():
     cpd = ChangePointDetecion(cfg['test_mode'], cfg['arl'], cfg['noise'], dataset['test'], cfg['pre_length'])
     logger = make_logger(os.path.join('output', 'runs', 'test_{}'.format(cfg['model_tag'])))
     test(data_loader['test'], cpd, metric, logger)
-    cpd.clean()
+    # cpd.clean()
     result = {'cfg': cfg, 'logger': logger, 'cpd': cpd}
     save(result, os.path.join('output', 'result', '{}.pt'.format(cfg['model_tag'])))
     return
@@ -55,7 +55,7 @@ def test(data_loader, cpd, metric, logger):
         logger.save(True)
         input = collate(input)
         input = to_device(input, cfg['device'])
-        output = cpd.test(input)
+        output = cpd.test(i, input)
         evaluation = metric.evaluate(metric.metric_name['test'], input, output)
         logger.append(evaluation, 'test', 1)
         if i % np.ceil((len(data_loader) * cfg['log_interval'])) == 0:

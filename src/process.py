@@ -65,7 +65,7 @@ def make_all_controls(mode):
         num_pre = ['500']
         num_post = ['10000']
         change = []
-        change_mean = [0, 0.1]
+        change_mean = [0, 0.5]
         change_logvar = float(0)
         for i in range(len(change_mean)):
             change_mean_i = float(change_mean[i])
@@ -73,7 +73,7 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['2000']
+        arl = ['10000']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(control_name)
@@ -296,10 +296,10 @@ def main():
              'mvn-logvar', 'mvn-logvar-arl', 'mvn-logvar-noise',
              'exp-tau', 'exp-tau-arl', 'exp-tau-noise',
              'rbm-W', 'rbm-W-arl', 'rbm-W-noise']
-    # modes = ['mvn-mean-lambda']
     # modes = ['mvn-mean', 'mvn-mean-arl', 'mvn-mean-noise']
     # modes = ['mvn-mean', 'mvn-logvar']
     modes = ['mvn-mean-lambda', 'mvn-logvar-lambda', 'exp-tau-lambda', 'rbm-W-lambda']
+    modes = ['mvn-mean-lambda']
     controls = []
     for mode in modes:
         controls += make_all_controls(mode)
