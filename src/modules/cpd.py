@@ -9,15 +9,16 @@ from .utils import load_kernel
 
 
 class ChangePointDetecion:
-    def __init__(self, test_mode, arl, noise, dataset):
+    def __init__(self, test_mode, arl, noise, dataset, pre_length):
         self.test_mode = test_mode
         self.arl = arl
         self.noise = noise
+        self.pre_length = pre_length
         self.cpd = self.make_cpd(dataset)
         self.reset()
 
     def reset(self):
-        self.stats = {'score': [], 'detect': [], 'threshold': []}
+        self.stats = {'score': [], 'detect': [], 'threshold': [], 'hyper_lambda': []}
         return
 
     def clean(self):
@@ -27,7 +28,9 @@ class ChangePointDetecion:
     def make_cpd(self, dataset):
         pre_data = torch.tensor(dataset.pre)
         pre_data = pre_data.view(-1, pre_data.size(-1))
-        pre_data = pre_data[torch.randperm(pre_data.size(0))][:dataset.pre.shape[1]].to(cfg['device'])
+        #To evaluate pre-data length
+        # pre_data = pre_data[torch.randperm(pre_data.size(0))][:dataset.pre.shape[1]].to(cfg['device'])
+        pre_data = pre_data[torch.randperm(self.pre_length)][:dataset.pre.shape[1]].to(cfg['device'])
         if self.test_mode == 'cusum':
             cpd = CUSUM(self.arl)
         elif self.test_mode == 'scusum':
@@ -58,7 +61,16 @@ class ChangePointDetecion:
         else:
             pre_model = None
             post_model = None
-        if self.test_mode in ['cusum', 'scusum']:
+        if self.test_mode in ['scusum']:
+            for t, data_i in enumerate(data):
+                score, detect, threshold, hyper_lambda = self.cpd._update(data_i.reshape(1, -1), pre_model, post_model)
+                self.stats['score'].append(score)
+                self.stats['detect'].append(detect)
+                self.stats['threshold'].append(threshold)
+                self.stats['hyper_lambda'].append(hyper_lambda)
+                if cp == len(data) and detect and t > target_cp - 1:
+                    cp = t + 1
+        elif self.test_mode in ['cusum']:
             for t, data_i in enumerate(data):
                 score, detect, threshold = self.cpd._update(data_i.reshape(1, -1), pre_model, post_model)
                 self.stats['score'].append(score)

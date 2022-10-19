@@ -8,6 +8,7 @@ control:
   noise: 0
   test_mode: scusum
   arl: 2000
+  pre_length: 500
 # experiment
 num_workers: 0
 init_seed: 0

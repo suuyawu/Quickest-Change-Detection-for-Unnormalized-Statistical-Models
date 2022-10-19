@@ -21,7 +21,6 @@ parser.add_argument('--control_name', default=None, type=str)
 args = vars(parser.parse_args())
 process_args(args)
 
-
 def main():
     seeds = list(range(cfg['init_seed'], cfg['init_seed'] + cfg['num_experiments']))
     for i in range(cfg['num_experiments']):
@@ -41,7 +40,7 @@ def runExperiment():
     process_dataset(dataset)
     metric = Metric({'test': ['CADD']})
     data_loader = make_data_loader(dataset, 'cpd')
-    cpd = ChangePointDetecion(cfg['test_mode'], cfg['arl'], cfg['noise'], dataset['test'])
+    cpd = ChangePointDetecion(cfg['test_mode'], cfg['arl'], cfg['noise'], dataset['test'], cfg['pre_length'])
     logger = make_logger(os.path.join('output', 'runs', 'test_{}'.format(cfg['model_tag'])))
     test(data_loader['test'], cpd, metric, logger)
     cpd.clean()

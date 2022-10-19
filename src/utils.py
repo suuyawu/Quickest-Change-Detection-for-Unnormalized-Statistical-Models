@@ -121,6 +121,7 @@ def process_control():
     cfg['noise'] = float(cfg['control']['noise'])
     cfg['test_mode'] = cfg['control']['test_mode']
     cfg['arl'] = int(cfg['control']['arl'])
+    cfg['pre_length'] = int(cfg['control']['pre_length'])
     if cfg['test_mode'] in ['cusum', 'scusum']:
         cfg['model_name'] = cfg['data_name'].lower()
     cfg['num_trials'] = 100

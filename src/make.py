@@ -149,6 +149,24 @@ def main():
         arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode, control_name)
+    elif mode == 'mvn-mean-lambda':
+        script_name = [['{}_cpd.py'.format(run)]]
+        data_names = ['MVN-2']
+        num_pre = ['500']
+        num_post = ['10000']
+        change = []
+        change_mean = [0, 0.5]
+        change_logvar = float(0)
+        for i in range(len(change_mean)):
+            change_mean_i = float(change_mean[i])
+            change_i = '{}-{}'.format(change_mean_i, change_logvar)
+            change.append(change_i)
+        noise = ['0']
+        test_mode = ['scusum']
+        arl = ['10000']
+        pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
+        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
+        controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode, control_name)
     elif mode == 'mvn-mean-noise':
         script_name = [['{}_cpd.py'.format(run)]]
         data_names = ['MVN-2']
