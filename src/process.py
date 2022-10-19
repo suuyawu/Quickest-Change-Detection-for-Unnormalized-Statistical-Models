@@ -5,7 +5,6 @@ import pandas as pd
 from utils import save, load, makedir_exist_ok
 import matplotlib.pyplot as plt
 from collections import defaultdict
-from brokenaxes import brokenaxes
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 result_path = os.path.join('output', 'result')
@@ -66,7 +65,7 @@ def make_all_controls(mode):
         num_pre = ['500']
         num_post = ['10000']
         change = []
-        change_mean = [0, 0.5]
+        change_mean = [0, 0.1]
         change_logvar = float(0)
         for i in range(len(change_mean)):
             change_mean_i = float(change_mean[i])
@@ -74,7 +73,7 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['10000']
+        arl = ['2000']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(control_name)
@@ -141,7 +140,7 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['10000']
+        arl = ['2000']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(control_name)
@@ -205,7 +204,7 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['10000']
+        arl = ['2000']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(control_name)
@@ -268,7 +267,7 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['20000']
+        arl = ['2000']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(control_name)
@@ -300,17 +299,19 @@ def main():
     # modes = ['mvn-mean-lambda']
     # modes = ['mvn-mean', 'mvn-mean-arl', 'mvn-mean-noise']
     # modes = ['mvn-mean', 'mvn-logvar']
+    modes = ['mvn-mean-lambda', 'mvn-logvar-lambda', 'exp-tau-lambda', 'rbm-W-lambda']
     controls = []
     for mode in modes:
         controls += make_all_controls(mode)
     processed_result = process_result(controls)
     df_mean = make_df(processed_result, 'mean')
     df_history = make_df(processed_result, 'history')
-    make_vis_runtime()
-    make_vis_score(df_history)
-    make_vis_change(df_mean)
-    make_vis_arl(df_mean)
-    make_vis_noise(df_mean)
+    # make_vis_runtime()
+    # make_vis_score(df_history)
+    # make_vis_change(df_mean)
+    # make_vis_arl(df_mean)
+    # make_vis_noise(df_mean)
+    make_vis_lambda(df_mean)
     return
 
 
@@ -341,6 +342,7 @@ def gather_result(control, model_tag, processed_result):
             score = np.array(base_result['cpd'].stats['score']).reshape((100, -1))
             detect = np.array(base_result['cpd'].stats['detect']).reshape((100, -1))
             threshold = np.array(base_result['cpd'].stats['threshold']).reshape((100, -1))
+            lambda_ = np.array(base_result['cpd'].stats['lambda'])
             mask = np.any((score == float('inf')) | np.isnan(score), axis=0)
             score = score[:, ~mask]
             detect = detect[:, ~mask]
@@ -351,6 +353,8 @@ def gather_result(control, model_tag, processed_result):
                 processed_result['test/detect']['mean']['summary']['std'] = detect.std()
                 processed_result['test/threshold']['history']['summary']['mean'] = threshold.mean(axis=0)
                 processed_result['test/threshold']['history']['summary']['std'] = threshold.std(axis=0)
+                processed_result['test/lambda']['mean']['summary']['mean'] = lambda_.mean()
+                processed_result['test/lambda']['mean']['summary']['std'] = lambda_.std()
             else:
                 print(model_tag)
         else:
@@ -363,7 +367,7 @@ def gather_result(control, model_tag, processed_result):
 def extract_result(extracted_processed_result, processed_result, control):
     def extract(metric_name, mode):
         output = False
-        if metric_name in ['test/CADD', 'test/detect']:
+        if metric_name in ['test/CADD', 'test/detect', 'test/lambda']:
             if mode == 'mean':
                 output = True
         elif metric_name in ['test/score', 'test/threshold']:
@@ -404,9 +408,6 @@ def make_df(processed_result, mode):
         writer.save()
     return df
 
-def make_vis_lambda():
-    #evaluate lambda
-    pass
 
 def make_vis_runtime():
     label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'Scan B-statistic', 'calm': 'CALM-MMD'}
@@ -1067,6 +1068,172 @@ def make_vis_noise(df_mean):
         ax_dict_2[fig_name].grid(linestyle='--', linewidth='0.5')
         fig[fig_name].tight_layout()
         dir_name = 'noise'
+        dir_path = os.path.join(vis_path, dir_name)
+        fig_path = os.path.join(dir_path, '{}.{}'.format(fig_name, save_format))
+        makedir_exist_ok(dir_path)
+        plt.savefig(fig_path, dpi=dpi, bbox_inches='tight', pad_inches=0)
+        plt.close(fig_name)
+    return
+
+
+def make_vis_lambda(df_mean):
+    label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'Scan B-statistic', 'calm': 'CALM-MMD'}
+    color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue', 'calm': 'cyan'}
+    linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':', 'calm': '-.'}
+    marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p', 'calm': 's'}
+    fontsize_dict = {'legend': 16, 'label': 16, 'ticks': 16}
+    loc_dict = {'lambda': 'upper right'}
+    fig_names = tree()
+    for df_name in df_mean:
+        df_name_list = df_name.split('_')
+        metric_name, stat = df_name_list[-2], df_name_list[-1]
+        data_name = df_name_list[0]
+        change = df_name_list[3]
+        noise = df_name_list[4]
+        test_mode = df_name_list[5]
+        arl = df_name_list[6]
+        pre_length = df_name_list[7]
+        mask_mvn_mean_0 = 'MVN' in data_name and change == '0.0-0.0' and test_mode == 'scusum' and \
+                          arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
+        mask_mvn_mean_1 = 'MVN' in data_name and change == '0.1-0.0' and test_mode == 'scusum' and \
+                          arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
+        mask_mvn_mean_2 = 'MVN' in data_name and change == '0.1-0.0' and test_mode == 'scusum' and \
+                          arl == '2000' and noise == '0' and metric_name == 'lambda' and stat == 'mean'
+        mask_mvn_logvar_1 = 'MVN' in data_name and change == '0.0-0.5' and test_mode == 'scusum' and \
+                            arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
+        mask_mvn_logvar_2 = 'MVN' in data_name and change == '0.0-0.5' and test_mode == 'scusum' and \
+                            arl == '2000' and noise == '0' and metric_name == 'lambda' and stat == 'mean'
+        mask_exp_tau_0 = 'EXP' in data_name and change == '0.0' and test_mode == 'scusum' and \
+                         arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
+        mask_exp_tau_1 = 'EXP' in data_name and change == '1.0' and test_mode == 'scusum' and \
+                         arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
+        mask_exp_tau_2 = 'EXP' in data_name and change == '1.0' and test_mode == 'scusum' and \
+                         arl == '2000' and noise == '0' and metric_name == 'lambda' and stat == 'mean'
+        mask_rbm_tau_0 = 'RBM' in data_name and change == '0.0' and test_mode == 'scusum' and \
+                         arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
+        mask_rbm_tau_1 = 'RBM' in data_name and change == '0.05' and test_mode == 'scusum' and \
+                         arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
+        mask_rbm_tau_2 = 'RBM' in data_name and change == '0.05' and test_mode == 'scusum' and \
+                         arl == '2000' and noise == '0' and metric_name == 'lambda' and stat == 'mean'
+        if mask_mvn_mean_0:
+            fig_names_ = ['mvn-mean', 'mvn-logvar']
+            mode = '0'
+        elif mask_mvn_mean_1:
+            fig_names_ = ['mvn-mean']
+            mode = '1'
+        elif mask_mvn_mean_2:
+            fig_names_ = ['mvn-mean']
+            mode = '2'
+        elif mask_mvn_logvar_1:
+            fig_names_ = ['mvn-logvar']
+            mode = '1'
+        elif mask_mvn_logvar_2:
+            fig_names_ = ['mvn-logvar']
+            mode = '2'
+        elif mask_exp_tau_0:
+            fig_names_ = ['exp-tau']
+            mode = '0'
+        elif mask_exp_tau_1:
+            fig_names_ = ['exp-tau']
+            mode = '1'
+        elif mask_exp_tau_2:
+            fig_names_ = ['exp-tau']
+            mode = '2'
+        elif mask_rbm_tau_0:
+            fig_names_ = ['rbm-W']
+            mode = '0'
+        elif mask_rbm_tau_1:
+            fig_names_ = ['rbm-W']
+            mode = '1'
+        elif mask_rbm_tau_2:
+            fig_names_ = ['rbm-W']
+            mode = '2'
+        else:
+            continue
+        df_name_std = '_'.join([*df_name_list[:-1], 'std'])
+        x = float(pre_length)
+        y = df_mean[df_name].iloc[0].to_numpy().item()
+        y_std = df_mean[df_name_std].iloc[0].to_numpy().item()
+        for fig_name in fig_names_:
+            if test_mode not in fig_names[fig_name]:
+                fig_names[fig_name][test_mode]['0'] = defaultdict(list)
+                fig_names[fig_name][test_mode]['1'] = defaultdict(list)
+                fig_names[fig_name][test_mode]['2'] = defaultdict(list)
+            fig_names[fig_name][test_mode][mode]['x'].append(x)
+            fig_names[fig_name][test_mode][mode]['y'].append(y)
+            fig_names[fig_name][test_mode][mode]['y_std'].append(y_std)
+    fig = {}
+    ax_dict_1 = {}
+    ax_dict_2 = {}
+    ax_dict_3 = {}
+    figsize = (15, 4)
+    for fig_name in fig_names:
+        for test_mode in fig_names[fig_name]:
+            x_1, y_1, y_1_std = fig_names[fig_name][test_mode]['1']['x'], fig_names[fig_name][test_mode]['1']['y'], \
+                                fig_names[fig_name][test_mode]['1']['y_std']
+            x_0, y_0, y_0_std = fig_names[fig_name][test_mode]['0']['x'], fig_names[fig_name][test_mode]['0']['y'], \
+                                fig_names[fig_name][test_mode]['0']['y_std']
+            x_2, y_2, y_2_std = fig_names[fig_name][test_mode]['2']['x'], fig_names[fig_name][test_mode]['2']['y'], \
+                                fig_names[fig_name][test_mode]['2']['y_std']
+            if len(y_1) == 0 or len(y_0) == 0 or len(y_2) == 0:
+                continue
+            x_1, y_1, y_1_std = zip(*sorted(zip(x_1, y_1, y_1_std)))
+            x_1, y_1, y_1_std = np.array(x_1), np.array(y_1), np.array(y_1_std)
+            x_0, y_0, y_0_std = zip(*sorted(zip(x_0, y_0, y_0_std)))
+            x_0, y_0, y_0_std = np.array(x_0), np.array(y_0), np.array(y_0_std)
+            x_2, y_2, y_2_std = zip(*sorted(zip(x_2, y_2, y_2_std)))
+            x_2, y_2, y_2_std = np.array(x_2), np.array(y_2), np.array(y_2_std)
+            fig[fig_name] = plt.figure(fig_name, figsize=figsize)
+            if fig_name not in ax_dict_1:
+                ax_dict_1[fig_name] = fig[fig_name].add_subplot(131)
+                ax_dict_2[fig_name] = fig[fig_name].add_subplot(132)
+                ax_dict_3[fig_name] = fig[fig_name].add_subplot(133)
+            ax_1 = ax_dict_1[fig_name]
+            ax_2 = ax_dict_2[fig_name]
+            ax_3 = ax_dict_3[fig_name]
+            xlabel = '$m$'
+            ylabel = 'Empirical CADD'
+            pivot = test_mode
+            ax_1.errorbar(x_1, y_1, yerr=y_1_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
+                          label=label_dict[pivot], marker=marker_dict[pivot])
+            ax_1.set_xlabel(xlabel, fontsize=fontsize_dict['label'])
+            ax_1.set_ylabel(ylabel, fontsize=fontsize_dict['label'])
+            ax_1.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
+            ax_1.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
+            ax_1.legend(loc=loc_dict['lambda'], fontsize=fontsize_dict['legend'])
+            ax_1.set_xscale('log')
+            ax_1.set_yscale('log')
+
+            xlabel = '$m$'
+            ylabel = 'Empirical ARL'
+            ax_2.errorbar(x_0, y_0, yerr=y_0_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
+                          label=label_dict[pivot], marker=marker_dict[pivot])
+            ax_2.set_xlabel(xlabel, fontsize=fontsize_dict['label'])
+            ax_2.set_ylabel(ylabel, fontsize=fontsize_dict['label'])
+            ax_2.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
+            ax_2.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
+            ax_2.legend(loc=loc_dict['lambda'], fontsize=fontsize_dict['legend'])
+            ax_2.set_xscale('log')
+            ax_2.set_yscale('log')
+
+            xlabel = '$m$'
+            ylabel = '$\lambda$'
+            ax_3.plot(x_2, y_2, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
+                      label=label_dict[pivot], marker=marker_dict[pivot])
+            ax_3.set_xlabel(xlabel, fontsize=fontsize_dict['label'])
+            ax_3.set_ylabel(ylabel, fontsize=fontsize_dict['label'])
+            ax_3.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
+            ax_3.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
+            ax_3.legend(loc=loc_dict['lambda'], fontsize=fontsize_dict['legend'])
+            ax_3.set_xscale('log')
+            # ax_3.set_yscale('log')
+    for fig_name in fig:
+        fig[fig_name] = plt.figure(fig_name)
+        ax_dict_1[fig_name].grid(linestyle='--', linewidth='0.5')
+        ax_dict_2[fig_name].grid(linestyle='--', linewidth='0.5')
+        ax_dict_3[fig_name].grid(linestyle='--', linewidth='0.5')
+        fig[fig_name].tight_layout()
+        dir_name = 'lambda'
         dir_path = os.path.join(vis_path, dir_name)
         fig_path = os.path.join(dir_path, '{}.{}'.format(fig_name, save_format))
         makedir_exist_ok(dir_path)

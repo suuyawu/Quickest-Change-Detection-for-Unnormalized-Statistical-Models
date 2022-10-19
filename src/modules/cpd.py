@@ -18,7 +18,7 @@ class ChangePointDetecion:
         self.cpd = self.make_cpd(dataset)
 
     def reset(self):
-        self.stats = {'score': [], 'detect': [], 'threshold': [], 'hyper_lambda': []}
+        self.stats = {'score': [], 'detect': [], 'threshold': []}
         return
 
     def clean(self):
