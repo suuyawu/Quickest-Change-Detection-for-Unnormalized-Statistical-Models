@@ -62,7 +62,6 @@ def make_all_controls(mode):
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'mvn-mean-lambda':
-        script_name = [['{}_cpd.py'.format(run)]]
         data_names = ['MVN-2']
         num_pre = ['500']
         num_post = ['10000']
@@ -78,7 +77,7 @@ def make_all_controls(mode):
         arl = ['10000']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
-        controls = make_controls(script_name, init_seeds, world_size, num_experiments, resume_mode, control_name)
+        controls = make_controls(control_name)
     elif mode == 'mvn-mean-noise':
         data_names = ['MVN-2']
         num_pre = ['500']
@@ -129,6 +128,23 @@ def make_all_controls(mode):
         arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
+    elif mode == 'mvn-logvar-lambda':
+        data_names = ['MVN-2']
+        num_pre = ['500']
+        num_post = ['10000']
+        change = []
+        change_mean = float(0)
+        change_logvar = [0, 0.5]
+        for i in range(len(change_logvar)):
+            change_logvar_i = float(change_logvar[i])
+            change_i = '{}-{}'.format(change_mean, change_logvar_i)
+            change.append(change_i)
+        noise = ['0']
+        test_mode = ['scusum']
+        arl = ['10000']
+        pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
+        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
+        controls = make_controls(control_name)
     elif mode == 'mvn-logvar-noise':
         data_names = ['MVN-2']
         num_pre = ['500']
@@ -177,6 +193,22 @@ def make_all_controls(mode):
         arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
+    elif mode == 'exp-tau-lambda':
+        data_names = ['EXP-2']
+        num_pre = ['500']
+        num_post = ['10000']
+        change = []
+        change_tau = [0, 1.0]
+        for i in range(len(change_tau)):
+            change_tau_i = float(change_tau[i])
+            change_i = '{}'.format(change_tau_i)
+            change.append(change_i)
+        noise = ['0']
+        test_mode = ['scusum']
+        arl = ['10000']
+        pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
+        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
+        controls = make_controls(control_name)
     elif mode == 'exp-tau-noise':
         data_names = ['EXP-2']
         num_pre = ['500']
@@ -224,6 +256,22 @@ def make_all_controls(mode):
         arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
+    elif mode == 'rbm-W-lambda':
+        data_names = ['RBM-50']
+        num_pre = ['500']
+        num_post = ['10000']
+        change = []
+        change_W = [0, 0.05]
+        for i in range(len(change_W)):
+            change_W_i = float(change_W[i])
+            change_i = '{}'.format(change_W_i)
+            change.append(change_i)
+        noise = ['0']
+        test_mode = ['scusum']
+        arl = ['20000']
+        pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
+        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
+        controls = make_controls(control_name)
     elif mode == 'rbm-W-noise':
         data_names = ['RBM-50']
         num_pre = ['500']
@@ -249,6 +297,7 @@ def main():
              'mvn-logvar', 'mvn-logvar-arl', 'mvn-logvar-noise',
              'exp-tau', 'exp-tau-arl', 'exp-tau-noise',
              'rbm-W', 'rbm-W-arl', 'rbm-W-noise']
+    # modes = ['mvn-mean-lambda']
     # modes = ['mvn-mean', 'mvn-mean-arl', 'mvn-mean-noise']
     # modes = ['mvn-mean', 'mvn-logvar']
     controls = []
@@ -355,6 +404,9 @@ def make_df(processed_result, mode):
         writer.save()
     return df
 
+def make_vis_lambda():
+    #evaluate lambda
+    pass
 
 def make_vis_runtime():
     label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'Scan B-statistic', 'calm': 'CALM-MMD'}
