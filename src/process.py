@@ -8,7 +8,7 @@ from collections import defaultdict
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 result_path = os.path.join('output', 'result')
-save_format = 'pdf'
+save_format = 'png'
 vis_path = os.path.join('output', 'vis', '{}'.format(save_format))
 num_experiments = 1
 exp = [str(x) for x in list(range(num_experiments))]
@@ -298,7 +298,7 @@ def main():
              'rbm-W', 'rbm-W-arl', 'rbm-W-noise']
     # modes = ['mvn-mean', 'mvn-mean-arl', 'mvn-mean-noise']
     # modes = ['mvn-mean', 'mvn-logvar']
-    # modes = ['mvn-mean-lambda', 'mvn-logvar-lambda', 'exp-tau-lambda', 'rbm-W-lambda']
+    modes = ['mvn-mean-lambda', 'mvn-logvar-lambda', 'exp-tau-lambda', 'rbm-W-lambda']
     controls = []
     for mode in modes:
         controls += make_all_controls(mode)
@@ -307,10 +307,10 @@ def main():
     df_history = make_df(processed_result, 'history')
     # make_vis_runtime()
     # make_vis_score(df_history)
-    make_vis_change(df_mean)
+    # make_vis_change(df_mean)
     # make_vis_arl(df_mean)
     # make_vis_noise(df_mean)
-    # make_vis_lambda(df_mean)
+    make_vis_lambda(df_mean)
     return
 
 
@@ -1202,6 +1202,11 @@ def make_vis_lambda(df_mean):
             ax_1.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_1.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_1.legend(loc=loc_dict['lambda'], fontsize=fontsize_dict['legend'])
+            if fig_name == 'rbm-W':
+                ylim_1 = list(ax_1.get_ylim())
+                ylim_1[0] = ylim_1[0] - 1.5
+                ylim_1[1] = ylim_1[1] + 1.5
+                ax_1.set_ylim(ylim_1)
             ax_1.set_xscale('log')
             ax_1.set_yscale('log')
 
@@ -1226,6 +1231,11 @@ def make_vis_lambda(df_mean):
             ax_3.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_3.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_3.legend(loc=loc_dict['lambda'], fontsize=fontsize_dict['legend'])
+            if fig_name == 'rbm-W':
+                ylim_3 = list(ax_3.get_ylim())
+                ylim_3[0] = 0.8
+                ylim_3[1] = 1.2
+                ax_3.set_ylim(ylim_3)
             ax_3.set_xscale('log')
             # ax_3.set_yscale('log')
     for fig_name in fig:
