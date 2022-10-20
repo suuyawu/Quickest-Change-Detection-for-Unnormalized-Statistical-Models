@@ -65,7 +65,7 @@ def make_all_controls(mode):
         num_pre = ['500']
         num_post = ['10000']
         change = []
-        change_mean = [0, 0.5]
+        change_mean = [0, 0.1]
         change_logvar = float(0)
         for i in range(len(change_mean)):
             change_mean_i = float(change_mean[i])
@@ -73,7 +73,7 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['10000']
+        arl = ['2000']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(control_name)
@@ -298,8 +298,7 @@ def main():
              'rbm-W', 'rbm-W-arl', 'rbm-W-noise']
     # modes = ['mvn-mean', 'mvn-mean-arl', 'mvn-mean-noise']
     # modes = ['mvn-mean', 'mvn-logvar']
-    modes = ['mvn-mean-lambda', 'mvn-logvar-lambda', 'exp-tau-lambda', 'rbm-W-lambda']
-    modes = ['mvn-mean-lambda']
+    # modes = ['mvn-mean-lambda', 'mvn-logvar-lambda', 'exp-tau-lambda', 'rbm-W-lambda']
     controls = []
     for mode in modes:
         controls += make_all_controls(mode)
@@ -308,10 +307,10 @@ def main():
     df_history = make_df(processed_result, 'history')
     # make_vis_runtime()
     # make_vis_score(df_history)
-    # make_vis_change(df_mean)
+    make_vis_change(df_mean)
     # make_vis_arl(df_mean)
     # make_vis_noise(df_mean)
-    make_vis_lambda(df_mean)
+    # make_vis_lambda(df_mean)
     return
 
 
@@ -342,7 +341,8 @@ def gather_result(control, model_tag, processed_result):
             score = np.array(base_result['cpd'].stats['score']).reshape((100, -1))
             detect = np.array(base_result['cpd'].stats['detect']).reshape((100, -1))
             threshold = np.array(base_result['cpd'].stats['threshold']).reshape((100, -1))
-            lambda_ = np.array(base_result['cpd'].stats['lambda'])
+            if 'lambda' in base_result['cpd'].stats:
+                lambda_ = np.array(base_result['cpd'].stats['lambda'])
             mask = np.any((score == float('inf')) | np.isnan(score), axis=0)
             score = score[:, ~mask]
             detect = detect[:, ~mask]
@@ -353,8 +353,9 @@ def gather_result(control, model_tag, processed_result):
                 processed_result['test/detect']['mean']['summary']['std'] = detect.std()
                 processed_result['test/threshold']['history']['summary']['mean'] = threshold.mean(axis=0)
                 processed_result['test/threshold']['history']['summary']['std'] = threshold.std(axis=0)
-                processed_result['test/lambda']['mean']['summary']['mean'] = lambda_.mean()
-                processed_result['test/lambda']['mean']['summary']['std'] = lambda_.std()
+                if 'lambda' in base_result['cpd'].stats:
+                    processed_result['test/lambda']['mean']['summary']['mean'] = lambda_.mean()
+                    processed_result['test/lambda']['mean']['summary']['std'] = lambda_.std()
             else:
                 print(model_tag)
         else:
@@ -794,8 +795,8 @@ def make_vis_change(df_mean):
     fig = {}
     ax_dict_1 = {}
     figsize = (5, 4)
-    xlabel_dict = {'mvn-mean': '$\Delta \mu$', 'mvn-logvar': '$\Delta \log(\sigma^2)$', 'exp-tau': '$\Delta \\tau$',
-                   'rbm-W': '$\sigma_{\Delta}$'}
+    xlabel_dict = {'mvn-mean': '$\delta \mu$', 'mvn-logvar': '$\delta \log(\sigma^2)$', 'exp-tau': '$\delta \\tau$',
+                   'rbm-W': '$\sigma_{\delta}$'}
     for fig_name in fig_names:
         for test_mode in fig_names[fig_name]:
             x, y, y_std = fig_names[fig_name][test_mode]['x'], fig_names[fig_name][test_mode]['y'], \
@@ -1218,7 +1219,7 @@ def make_vis_lambda(df_mean):
 
             xlabel = '$m$'
             ylabel = '$\lambda$'
-            ax_3.plot(x_2, y_2, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
+            ax_3.errorbar(x_2, y_2, yerr=y_2_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
                       label=label_dict[pivot], marker=marker_dict[pivot])
             ax_3.set_xlabel(xlabel, fontsize=fontsize_dict['label'])
             ax_3.set_ylabel(ylabel, fontsize=fontsize_dict['label'])

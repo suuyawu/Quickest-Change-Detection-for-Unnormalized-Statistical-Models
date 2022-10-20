@@ -19,6 +19,8 @@ class ChangePointDetecion:
 
     def reset(self):
         self.stats = {'score': [], 'detect': [], 'threshold': []}
+        if self.test_mode == 'scusum':
+            self.stats['lambda'] = []
         return
 
     def clean(self):
@@ -29,7 +31,7 @@ class ChangePointDetecion:
         pre_data = torch.tensor(dataset.pre)
         pre_data = pre_data.view(-1, pre_data.size(-1))
         cpds = []
-        for i in range(dataset.pre.shape[0]):
+        for i in range(cfg['num_trials']):
             perturb_index = torch.randperm(pre_data.size(0))
             if self.pre_length is None:
                 initial_data = pre_data[perturb_index][:dataset.pre.shape[1]].to(cfg['device'])
@@ -41,7 +43,7 @@ class ChangePointDetecion:
                 pre_param = dataset[0]['pre_param']
                 pre_model = eval('models.{}(pre_param).to(cfg["device"])'.format(cfg['model_name']))
                 cpd = SCUSUM(self.arl, initial_data, pre_model)
-                self.stats['lambda'] = cpd.hyper_lambda
+                self.stats['lambda'].append(cpd.hyper_lambda)
             elif self.test_mode == 'scanb':
                 cpd = SCANB(kernel=load_kernel('gaussian_rbf'), initial_data=initial_data, ert=self.arl, window_size=25,
                             test_every_k=1, n_samples=25000)
