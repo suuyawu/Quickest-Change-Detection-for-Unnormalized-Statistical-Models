@@ -8,7 +8,7 @@ from collections import defaultdict
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 result_path = os.path.join('output', 'result')
-save_format = 'png'
+save_format = 'pdf'
 vis_path = os.path.join('output', 'vis', '{}'.format(save_format))
 num_experiments = 1
 exp = [str(x) for x in list(range(num_experiments))]
@@ -298,7 +298,7 @@ def main():
              'rbm-W', 'rbm-W-arl', 'rbm-W-noise']
     # modes = ['mvn-mean', 'mvn-mean-arl', 'mvn-mean-noise']
     # modes = ['mvn-mean', 'mvn-logvar']
-    modes = ['mvn-mean-lambda', 'mvn-logvar-lambda', 'exp-tau-lambda', 'rbm-W-lambda']
+    # modes = ['mvn-mean-lambda', 'mvn-logvar-lambda', 'exp-tau-lambda', 'rbm-W-lambda']
     controls = []
     for mode in modes:
         controls += make_all_controls(mode)
@@ -307,10 +307,10 @@ def main():
     df_history = make_df(processed_result, 'history')
     # make_vis_runtime()
     # make_vis_score(df_history)
-    # make_vis_change(df_mean)
+    make_vis_change(df_mean)
     # make_vis_arl(df_mean)
     # make_vis_noise(df_mean)
-    make_vis_lambda(df_mean)
+    # make_vis_lambda(df_mean)
     return
 
 
@@ -795,8 +795,8 @@ def make_vis_change(df_mean):
     fig = {}
     ax_dict_1 = {}
     figsize = (5, 4)
-    xlabel_dict = {'mvn-mean': '$\delta \mu$', 'mvn-logvar': '$\delta \log(\sigma^2)$', 'exp-tau': '$\delta \\tau$',
-                   'rbm-W': '$\sigma_{\delta}$'}
+    xlabel_dict = {'mvn-mean': '$\epsilon \mu$', 'mvn-logvar': '$\epsilon \log(\sigma^2)$',
+                   'exp-tau': '$\epsilon \\tau$', 'rbm-W': '$\sigma_{\epsilon}$'}
     for fig_name in fig_names:
         for test_mode in fig_names[fig_name]:
             x, y, y_std = fig_names[fig_name][test_mode]['x'], fig_names[fig_name][test_mode]['y'], \
@@ -1225,7 +1225,7 @@ def make_vis_lambda(df_mean):
             xlabel = '$m$'
             ylabel = '$\lambda$'
             ax_3.errorbar(x_2, y_2, yerr=y_2_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
-                      label=label_dict[pivot], marker=marker_dict[pivot])
+                          label=label_dict[pivot], marker=marker_dict[pivot])
             ax_3.set_xlabel(xlabel, fontsize=fontsize_dict['label'])
             ax_3.set_ylabel(ylabel, fontsize=fontsize_dict['label'])
             ax_3.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
