@@ -2,7 +2,7 @@
 This is an implementation of Score-based-Change-Point-Detection for Unnormalized Models
 
 ## Requirements
-See requirements.txt
+See `requirements.txt`
 
 ## Instructions
  - Global hyperparameters are configured in `config.yml`
