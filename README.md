@@ -22,7 +22,7 @@ See `requirements.txt`
     ```ruby
     python test_cpd.py MVN-2_500_10000_0.0-0.5_0.1_2000
     ```
- - Test CALM for EXP ( $d=2$ ) dataset with 500 pre data, 10000 post data, $\epsilon_{\tau} = 1.0$, $\sigma_{noise} = 0.3$, ARL $=2000$
+ - Test CALM-MMD for EXP ( $d=2$ ) dataset with 500 pre data, 10000 post data, $\epsilon_{\tau} = 1.0$, $\sigma_{noise} = 0.3$, ARL $=2000$
     ```ruby
     python test_cpd.py EXP-2_500_10000_1.0_0.3_2000
     ```
