@@ -1,5 +1,5 @@
 # Quickest Change Detection for Unnormalized Statistical Models
-This is an implementation of [Quickest Change Detection for Unnormalized Statistical Models](https://arxiv.org/abs/2302.00250)
+This is an implementation of [Quickest Change Detection for Unnormalized Statistical Models](https://arxiv.org/abs/2302.00250) and [Score-based Change Point Detection for Unnormalized Models]()
 
 ## Requirements
 See `requirements.txt`
