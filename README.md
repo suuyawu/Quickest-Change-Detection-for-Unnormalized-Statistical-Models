@@ -1,5 +1,5 @@
-# Score-based-Change-Point-Detection for Unnormalized Models
-This is an implementation of Score-based-Change-Point-Detection for Unnormalized Models
+# Quickest Change Detection for Unnormalized Statistical Models
+This is an implementation of [Quickest Change Detection for Unnormalized Statistical Models](https://arxiv.org/abs/2302.00250)
 
 ## Requirements
 See `requirements.txt`
@@ -30,3 +30,16 @@ See `requirements.txt`
     ```ruby
     python test_cpd.py RBM-50_500_10000_0.05_0_2000_500
     ```
+
+## Results
+- The results of Detection Score (before and after change) with MVN ($\epsilon_{\mu} = 0.3$) and ARL$=2000$.
+<p align="center">
+<img src="/asset/MVN-2_500_10000_0.0-0.3_0_scusum_2000_score_mean.png">
+</p>
+
+## Acknowledgements
+*Suya Wu  
+Enmao Diao  
+Taposh Banerjee  
+Jie Ding  
+Vahid Tarokh*
