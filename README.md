@@ -32,7 +32,7 @@ See `requirements.txt`
     ```
 
 ## Results
-- The results of Detection Score (before and after change) with MVN ($\epsilon_{\mu} = 0.3$) and ARL$=2000$.
+- The results of Detection Score (before and after change) with MVN ( $\epsilon_{\mu} = 0.3$ ) and ARL $=2000$.
 <p align="center">
 <img src="/asset/MVN-2_500_10000_0.0-0.3_0_scusum_2000_score_mean.png">
 </p>
