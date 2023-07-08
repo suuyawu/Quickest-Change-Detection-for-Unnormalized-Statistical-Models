@@ -89,7 +89,7 @@ class CALM():
     def _reset(self):
         self._initialise()
 
-    def _update(self, x: torch.tensor):
+    def _update(self, x: torch.tensor, pre_model = None, post_model = None):
         self.t += 1
 
         self.current_window.append(x)

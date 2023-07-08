@@ -4,10 +4,9 @@ from config import cfg
 from utils import recur
 
 
-def CADD(cp, pre_data, post_data):
+def EDD(cp):
     with torch.no_grad():
-        target_cp = len(pre_data)
-        N = len(pre_data) + len(post_data)
+        target_cp = cfg['change_point']
         cadd = cp - target_cp
     return cadd
 
@@ -15,7 +14,9 @@ def CADD(cp, pre_data, post_data):
 class Metric(object):
     def __init__(self, metric_name):
         self.metric_name = self.make_metric_name(metric_name)
-        self.metric = {'CADD': (lambda input, output: CADD(output['cp'], input['pre_data'], input['post_data']))}
+        self.metric = {'CP': (lambda input, output: output['cp']),
+                       'ARL': (lambda input, output: output['arl']),
+                       'EDD': (lambda input, output: output['cp'] -  cfg['change_point'])}
         self.reset()
 
     def make_metric_name(self, metric_name):

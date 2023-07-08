@@ -93,7 +93,7 @@ class SCANB:
     def _reset(self):
         self._initialise()
 
-    def _update(self, x: torch.tensor):
+    def _update(self, x: torch.tensor, pre_model = None, post_model = None):
         self.t += 1
         x = x.reshape(-1).to(self.device)
         ws = self.window_size

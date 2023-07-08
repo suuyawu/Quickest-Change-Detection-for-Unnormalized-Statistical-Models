@@ -57,7 +57,8 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['cusum', 'scusum', 'scanb', 'calm']
-        arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
+        # arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
+        arl = ['100', '200', '400', '800', '1500', '3000', '5000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'mvn-mean-lambda':
@@ -124,7 +125,8 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['cusum', 'scusum', 'scanb', 'calm']
-        arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
+        # arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
+        arl = ['100', '200', '400', '800', '1500', '3000', '5000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'mvn-logvar-lambda':
@@ -189,7 +191,8 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['cusum', 'scusum', 'scanb', 'calm']
-        arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
+        # arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
+        arl = ['100', '200', '400', '800', '1500', '3000', '5000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'exp-tau-lambda':
@@ -252,7 +255,8 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum', 'scanb', 'calm']
-        arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
+        # arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
+        arl = ['100', '200', '400', '800', '1500', '3000', '5000']
         control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'rbm-W-lambda':

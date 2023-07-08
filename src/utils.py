@@ -117,6 +117,7 @@ def process_control():
     cfg['data_name'], cfg['num_dims'] = data_name_list[0], int(data_name_list[1])
     cfg['num_pre'] = int(cfg['control']['num_pre'])
     cfg['num_post'] = int(cfg['control']['num_post'])
+    cfg['change_point'] = int(cfg['control']['change_point'])
     cfg['change'] = cfg['control']['change']
     cfg['noise'] = float(cfg['control']['noise'])
     cfg['test_mode'] = cfg['control']['test_mode']
@@ -125,8 +126,7 @@ def process_control():
         cfg['pre_length'] = int(cfg['control']['pre_length'])
     else:
         cfg['pre_length'] = None
-    if cfg['test_mode'] in ['cusum', 'scusum']:
-        cfg['model_name'] = cfg['data_name'].lower()
+    cfg['model_name'] = cfg['data_name'].lower()
     cfg['num_trials'] = 100
     cfg['cpd'] = {}
     cfg['cpd']['batch_size'] = {'test': 1}

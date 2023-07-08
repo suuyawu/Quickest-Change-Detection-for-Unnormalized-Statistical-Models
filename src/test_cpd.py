@@ -38,7 +38,7 @@ def runExperiment():
     torch.cuda.manual_seed(cfg['seed'])
     dataset = fetch_dataset(cfg['data_name'], cfg['params'])
     process_dataset(dataset)
-    metric = Metric({'test': ['CADD']})
+    metric = Metric({'test': ['CP', 'ARL', 'EDD']})
     data_loader = make_data_loader(dataset, 'cpd')
     cpd = ChangePointDetecion(cfg['test_mode'], cfg['arl'], cfg['noise'], dataset['test'], cfg['pre_length'])
     logger = make_logger(os.path.join('output', 'runs', 'test_{}'.format(cfg['model_tag'])))
