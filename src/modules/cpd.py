@@ -1,5 +1,6 @@
 import torch
 import models
+import math
 from config import cfg
 from .cusum import CUSUM
 from .scusum import SCUSUM
@@ -33,10 +34,7 @@ class ChangePointDetecion:
         pre_param, post_param = input['pre_param'], input['post_param']
         initial_data = pre_data.view(-1, pre_data.size(-1))
         perturb_index = torch.randperm(initial_data.size(0))
-        if self.pre_length is None:
-            initial_data = initial_data[perturb_index][:dataset.pre.shape[1]].to(cfg['device'])
-        else:
-            initial_data = initial_data[perturb_index][:self.pre_length].to(cfg['device'])
+        initial_data = initial_data[perturb_index][:1000].to(cfg['device'])
         pre_model = eval('models.{}(pre_param).to(cfg["device"])'.format(cfg['model_name']))
         post_model = eval('models.{}(post_param).to(cfg["device"])'.format(cfg['model_name']))
         if self.test_mode == 'cusum':
@@ -54,9 +52,9 @@ class ChangePointDetecion:
             raise ValueError('Not valid test mode')
         return cpd
 
-    def test(self, i, input):
+    def test(self, i, input, dataset):
         change_data = torch.cat([input['pre_data'][:cfg['change_point']], input['post_data']], dim=0)
-        pre_data = torch.cat([input['pre_data'][:cfg['change_point']], input['pre_data']], dim=0)
+        pre_data = input['pre_data']
         change_data = change_data + cfg['noise'] * torch.randn(change_data.size(), device=change_data.device)
         pre_data = pre_data + cfg['noise'] * torch.randn(pre_data.size(), device=pre_data.device)
     
@@ -69,6 +67,15 @@ class ChangePointDetecion:
             post_model = None
         else:
             raise ValueError('Not valid test mode')
+        #lambda
+        if self.test_mode in ['scusum'] and (self.pre_length is not None):
+            pre_data_2 = torch.tensor(dataset.pre).to(cfg['device'])
+            initial_data = pre_data_2.view(-1, pre_data_2.size(-1))
+            perturb_index = torch.randperm(initial_data.size(0))
+            initial_data = initial_data[perturb_index][:self.pre_length].to(cfg['device'])
+            self.cpd.hyper_lambda = self.cpd.make_hyper_lambda(initial_data, pre_model)
+            self.cpd.threshold = self.cpd.make_threshold(self.cpd.arl, pre_data_2, pre_model, post_model, 0, 0, math.log(self.cpd.arl))
+            self.stats['lambda'].append(self.cpd.hyper_lambda)
         #edd
         self.cpd._reset()
         cp = 0

@@ -46,7 +46,7 @@ class SCUSUM:
     def make_hyper_lambda(self, initial_data, pre_model):
         def func(x):
             hs = pre_model.hscore(initial_data).detach().cpu().numpy()
-            out = np.exp(x * hs).mean() - 1
+            out = np.exp(np.float128(x * hs)).mean() - 1
             return [out]
         hyper_lambda = fsolve(func, [1])[0]
         return hyper_lambda
