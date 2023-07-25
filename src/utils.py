@@ -127,7 +127,7 @@ def process_control():
     else:
         cfg['pre_length'] = None
     cfg['model_name'] = cfg['data_name'].lower()
-    cfg['num_trials'] = 100
+    cfg['num_trials'] = 1000
     cfg['cpd'] = {}
     cfg['cpd']['batch_size'] = {'test': 1}
     cfg['cpd']['shuffle'] = {'test': False}
