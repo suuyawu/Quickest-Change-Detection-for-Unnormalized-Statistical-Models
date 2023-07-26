@@ -3,12 +3,16 @@ import itertools
 import numpy as np
 import pandas as pd
 from utils import save, load, makedir_exist_ok
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype'] = 42
+
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 result_path = os.path.join('output', 'result')
-save_format = 'pdf'
+save_format = 'png'
 vis_path = os.path.join('output', 'vis', '{}'.format(save_format))
 num_experiments = 1
 exp = [str(x) for x in list(range(num_experiments))]
@@ -28,8 +32,9 @@ def make_controls(control_name):
 def make_all_controls(mode):
     if mode == 'mvn-mean':
         data_names = ['MVN-2']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
         # change_mean = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,
         #                0.9, 0.95, 1]
@@ -41,15 +46,16 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['cusum', 'scusum', 'scanb', 'calm']
-        arl = ['2000']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        arl = ['800']
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'mvn-mean-arl':
         data_names = ['MVN-2']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
-        change_mean = [0, 0.1]
+        change_mean = [0.1]
         change_logvar = float(0)
         for i in range(len(change_mean)):
             change_mean_i = float(change_mean[i])
@@ -57,16 +63,16 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['cusum', 'scusum', 'scanb', 'calm']
-        # arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
         arl = ['100', '200', '400', '800', '1500', '3000', '5000']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'mvn-mean-lambda':
         data_names = ['MVN-2']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
-        change_mean = [0, 0.1]
+        change_mean = [0.1]
         change_logvar = float(0)
         for i in range(len(change_mean)):
             change_mean_i = float(change_mean[i])
@@ -74,16 +80,17 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['2000']
+        arl = ['800']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(control_name)
     elif mode == 'mvn-mean-noise':
         data_names = ['MVN-2']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
-        change_mean = [0, 0.1]
+        change_mean = [0.1]
         change_logvar = float(0)
         for i in range(len(change_mean)):
             change_mean_i = float(change_mean[i])
@@ -91,13 +98,14 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0.005', '0.01', '0.05', '0.1', '0.5', '1']
         test_mode = ['cusum', 'scusum', 'scanb', 'calm']
-        arl = ['2000']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        arl = ['800']
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'mvn-logvar':
         data_names = ['MVN-2']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
         change_mean = float(0)
         # change_logvar = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8,
@@ -109,63 +117,66 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['cusum', 'scusum', 'scanb', 'calm']
-        arl = ['2000']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        arl = ['800']
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'mvn-logvar-arl':
         data_names = ['MVN-2']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
         change_mean = float(0)
-        change_logvar = [0, 0.5]
+        change_logvar = [0.5]
         for i in range(len(change_logvar)):
             change_logvar_i = float(change_logvar[i])
             change_i = '{}-{}'.format(change_mean, change_logvar_i)
             change.append(change_i)
         noise = ['0']
         test_mode = ['cusum', 'scusum', 'scanb', 'calm']
-        # arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
         arl = ['100', '200', '400', '800', '1500', '3000', '5000']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'mvn-logvar-lambda':
         data_names = ['MVN-2']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
         change_mean = float(0)
-        change_logvar = [0, 0.5]
+        change_logvar = [0.5]
         for i in range(len(change_logvar)):
             change_logvar_i = float(change_logvar[i])
             change_i = '{}-{}'.format(change_mean, change_logvar_i)
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['2000']
+        arl = ['800']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(control_name)
     elif mode == 'mvn-logvar-noise':
         data_names = ['MVN-2']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
         change_mean = float(0)
-        change_logvar = [0, 0.5]
+        change_logvar = [0.5]
         for i in range(len(change_logvar)):
             change_logvar_i = float(change_logvar[i])
             change_i = '{}-{}'.format(change_mean, change_logvar_i)
             change.append(change_i)
         noise = ['0.005', '0.01', '0.05', '0.1', '0.5', '1']
         test_mode = ['cusum', 'scusum', 'scanb', 'calm']
-        arl = ['2000']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        arl = ['800']
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'exp-tau':
         data_names = ['EXP-2']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
         # change_tau = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
         #               2.0]
@@ -176,60 +187,63 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['cusum', 'scusum', 'scanb', 'calm']
-        arl = ['2000']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        arl = ['800']
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'exp-tau-arl':
         data_names = ['EXP-2']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
-        change_tau = [0, 1.0]
+        change_tau = [1.0]
         for i in range(len(change_tau)):
             change_tau_i = float(change_tau[i])
             change_i = '{}'.format(change_tau_i)
             change.append(change_i)
         noise = ['0']
         test_mode = ['cusum', 'scusum', 'scanb', 'calm']
-        # arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
         arl = ['100', '200', '400', '800', '1500', '3000', '5000']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'exp-tau-lambda':
         data_names = ['EXP-2']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
-        change_tau = [0, 1.0]
+        change_tau = [1.0]
         for i in range(len(change_tau)):
             change_tau_i = float(change_tau[i])
             change_i = '{}'.format(change_tau_i)
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['2000']
+        arl = ['800']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(control_name)
     elif mode == 'exp-tau-noise':
         data_names = ['EXP-2']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
-        change_tau = [0, 1.0]
+        change_tau = [1.0]
         for i in range(len(change_tau)):
             change_tau_i = float(change_tau[i])
             change_i = '{}'.format(change_tau_i)
             change.append(change_i)
         noise = ['0.005', '0.01', '0.05', '0.1', '0.5', '1']
         test_mode = ['cusum', 'scusum', 'scanb', 'calm']
-        arl = ['2000']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        arl = ['800']
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'rbm-W':
         data_names = ['RBM-50']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
         # change_W = [0, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.055, 0.06, 0.065, 0.07,
         #             0.075, 0.08, 0.085, 0.09, 0.095, 0.1]
@@ -240,55 +254,57 @@ def make_all_controls(mode):
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum', 'scanb', 'calm']
-        arl = ['2000']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        arl = ['800']
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'rbm-W-arl':
         data_names = ['RBM-50']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
-        change_W = [0, 0.05]
+        change_W = [0.01]
         for i in range(len(change_W)):
             change_W_i = float(change_W[i])
             change_i = '{}'.format(change_W_i)
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum', 'scanb', 'calm']
-        # arl = ['500', '1000', '1500', '2500', '5000', '7500', '10000', '15000', '20000']
         arl = ['100', '200', '400', '800', '1500', '3000', '5000']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     elif mode == 'rbm-W-lambda':
         data_names = ['RBM-50']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
-        change_W = [0, 0.05]
+        change_W = [0.01]
         for i in range(len(change_W)):
             change_W_i = float(change_W[i])
             change_i = '{}'.format(change_W_i)
             change.append(change_i)
         noise = ['0']
         test_mode = ['scusum']
-        arl = ['2000']
+        arl = ['800']
         pre_length = ['10', '20', '30', '40', '50', '100', '200', '300', '400', '500']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl, pre_length]]
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl, pre_length]]
         controls = make_controls(control_name)
     elif mode == 'rbm-W-noise':
         data_names = ['RBM-50']
-        num_pre = ['500']
+        num_pre = ['10000']
         num_post = ['10000']
+        change_point = ['1']
         change = []
-        change_W = [0, 0.05]
+        change_W = [0.01]
         for i in range(len(change_W)):
             change_W_i = float(change_W[i])
             change_i = '{}'.format(change_W_i)
             change.append(change_i)
         noise = ['0.005', '0.01', '0.05', '0.1', '0.5', '1']
         test_mode = ['scusum', 'scanb', 'calm']
-        arl = ['2000']
-        control_name = [[data_names, num_pre, num_post, change, noise, test_mode, arl]]
+        arl = ['800']
+        control_name = [[data_names, num_pre, num_post, change_point, change, noise, test_mode, arl]]
         controls = make_controls(control_name)
     else:
         raise ValueError('Not valid mode')
@@ -300,15 +316,16 @@ def main():
              'mvn-logvar', 'mvn-logvar-arl', 'mvn-logvar-noise',
              'exp-tau', 'exp-tau-arl', 'exp-tau-noise',
              'rbm-W', 'rbm-W-arl', 'rbm-W-noise']
-    # modes = ['mvn-mean', 'mvn-mean-arl', 'mvn-mean-noise']
-    # modes = ['mvn-mean', 'mvn-logvar']
     # modes = ['mvn-mean-lambda', 'mvn-logvar-lambda', 'exp-tau-lambda', 'rbm-W-lambda']
+    # modes = ['mvn-mean-noise', 'mvn-logvar-noise', 'exp-tau-noise', 'rbm-W-noise']
+    # modes = ['mvn-mean-arl', 'mvn-logvar-arl', 'exp-tau-arl', 'rbm-W-arl']
+    modes = ['mvn-mean', 'mvn-logvar', 'exp-tau', 'rbm-W']
     controls = []
     for mode in modes:
         controls += make_all_controls(mode)
     processed_result = process_result(controls)
     df_mean = make_df(processed_result, 'mean')
-    df_history = make_df(processed_result, 'history')
+    # df_history = make_df(processed_result, 'history')
     # make_vis_runtime()
     # make_vis_score(df_history)
     make_vis_change(df_mean)
@@ -342,21 +359,21 @@ def gather_result(control, model_tag, processed_result):
                     base_result['logger'].history[metric_name])
                 processed_result[metric_name]['mean']['summary']['std'] = np.std(
                     base_result['logger'].history[metric_name])
-            score = np.array(base_result['cpd'].stats['score']).reshape((100, -1))
-            detect = np.array(base_result['cpd'].stats['detect']).reshape((100, -1))
-            threshold = np.array(base_result['cpd'].stats['threshold']).reshape((100, -1))
+            score = np.array(base_result['cpd'].stats['score'])
+            detect = np.array(base_result['cpd'].stats['detect'])
+            threshold = np.array(base_result['cpd'].stats['threshold'])
             if 'lambda' in base_result['cpd'].stats:
                 lambda_ = np.array(base_result['cpd'].stats['lambda'])
             mask = np.any((score == float('inf')) | np.isnan(score), axis=0)
             score = score[:, ~mask]
             detect = detect[:, ~mask]
             if score.shape[1] > 0:
-                processed_result['test/score']['history']['summary']['mean'] = score.mean(axis=0)
-                processed_result['test/score']['history']['summary']['std'] = score.std(axis=0)
+                processed_result['test/score']['history']['summary']['mean'] = score.mean()
+                processed_result['test/score']['history']['summary']['std'] = score.std()
                 processed_result['test/detect']['mean']['summary']['mean'] = detect.mean()
                 processed_result['test/detect']['mean']['summary']['std'] = detect.std()
-                processed_result['test/threshold']['history']['summary']['mean'] = threshold.mean(axis=0)
-                processed_result['test/threshold']['history']['summary']['std'] = threshold.std(axis=0)
+                processed_result['test/threshold']['history']['summary']['mean'] = threshold.mean()
+                processed_result['test/threshold']['history']['summary']['std'] = threshold.std()
                 if 'lambda' in base_result['cpd'].stats:
                     processed_result['test/lambda']['mean']['summary']['mean'] = lambda_.mean()
                     processed_result['test/lambda']['mean']['summary']['std'] = lambda_.std()
@@ -372,7 +389,7 @@ def gather_result(control, model_tag, processed_result):
 def extract_result(extracted_processed_result, processed_result, control):
     def extract(metric_name, mode):
         output = False
-        if metric_name in ['test/CADD', 'test/detect', 'test/lambda']:
+        if metric_name in ['test/CP', 'test/ARL', 'test/EDD', 'test/detect', 'test/lambda']:
             if mode == 'mean':
                 output = True
         elif metric_name in ['test/score', 'test/threshold']:
@@ -472,10 +489,10 @@ def make_vis_score(df_history):
     for df_name in df_history:
         df_name_list = df_name.split('_')
         metric_name, stat = df_name_list[-2], df_name_list[-1]
-        noise = df_name_list[4]
-        test_mode = df_name_list[5]
-        arl = df_name_list[6]
-        mask = noise == '0' and test_mode == 'scusum' and arl == '2000' and metric_name == 'score' and stat == 'mean'
+        noise = df_name_list[5]
+        test_mode = df_name_list[6]
+        arl = df_name_list[7]
+        mask = noise == '0' and test_mode == 'scusum' and arl == '800' and metric_name == 'score' and stat == 'mean'
         if mask:
             data_name = df_name_list[0]
             fig_name = '_'.join([*df_name_list])
@@ -497,14 +514,14 @@ def make_vis_score(df_history):
                 df_name_calm = '_'.join([*df_name_list[:5], 'calm', *df_name_list[6:-1], stat])
                 df_name_calm_std = '_'.join([*df_name_list[:5], 'calm', *df_name_list[6:-1], 'std'])
 
-                cusum = df_history[df_name_cusum].iloc[0].to_numpy()[:2000]
-                cusum_std = df_history[df_name_cusum_std].iloc[0].to_numpy()[:2000]
-                scusum = df_history[df_name_scusum].iloc[0].to_numpy()[:2000]
-                scusum_std = df_history[df_name_scusum_std].iloc[0].to_numpy()[:2000]
-                scanb = df_history[df_name_scanb].iloc[0].to_numpy()[:2000]
-                scanb_std = df_history[df_name_scanb_std].iloc[0].to_numpy()[:2000]
-                calm = df_history[df_name_calm].iloc[0].to_numpy()[:2000]
-                calm_std = df_history[df_name_calm_std].iloc[0].to_numpy()[:2000]
+                cusum = df_history[df_name_cusum].iloc[0].to_numpy()[:800]
+                cusum_std = df_history[df_name_cusum_std].iloc[0].to_numpy()[:800]
+                scusum = df_history[df_name_scusum].iloc[0].to_numpy()[:800]
+                scusum_std = df_history[df_name_scusum_std].iloc[0].to_numpy()[:800]
+                scanb = df_history[df_name_scanb].iloc[0].to_numpy()[:800]
+                scanb_std = df_history[df_name_scanb_std].iloc[0].to_numpy()[:800]
+                calm = df_history[df_name_calm].iloc[0].to_numpy()[:800]
+                calm_std = df_history[df_name_calm_std].iloc[0].to_numpy()[:800]
 
                 df_name_cusum_threshold = '_'.join([*df_name_list[:5], 'cusum', *df_name_list[6:-2],
                                                     'threshold', stat])
@@ -521,14 +538,14 @@ def make_vis_score(df_history):
                 df_name_calm_threshold_std = '_'.join([*df_name_list[:5], 'calm', *df_name_list[6:-2],
                                                        'threshold', 'std'])
 
-                cusum_threshold = df_history[df_name_cusum_threshold].iloc[0].to_numpy()[:2000]
-                cusum_threshold_std = df_history[df_name_cusum_threshold_std].iloc[0].to_numpy()[:2000]
-                scusum_threshold = df_history[df_name_scusum_threshold].iloc[0].to_numpy()[:2000]
-                scusum_threshold_std = df_history[df_name_scusum_threshold_std].iloc[0].to_numpy()[:2000]
-                scanb_threshold = df_history[df_name_scanb_threshold].iloc[0].to_numpy()[:2000]
-                scanb_threshold_std = df_history[df_name_scanb_threshold_std].iloc[0].to_numpy()[:2000]
-                calm_threshold = df_history[df_name_calm_threshold].iloc[0].to_numpy()[:2000]
-                calm_threshold_std = df_history[df_name_calm_threshold_std].iloc[0].to_numpy()[:2000]
+                cusum_threshold = df_history[df_name_cusum_threshold].iloc[0].to_numpy()[:800]
+                cusum_threshold_std = df_history[df_name_cusum_threshold_std].iloc[0].to_numpy()[:800]
+                scusum_threshold = df_history[df_name_scusum_threshold].iloc[0].to_numpy()[:800]
+                scusum_threshold_std = df_history[df_name_scusum_threshold_std].iloc[0].to_numpy()[:800]
+                scanb_threshold = df_history[df_name_scanb_threshold].iloc[0].to_numpy()[:800]
+                scanb_threshold_std = df_history[df_name_scanb_threshold_std].iloc[0].to_numpy()[:800]
+                calm_threshold = df_history[df_name_calm_threshold].iloc[0].to_numpy()[:800]
+                calm_threshold_std = df_history[df_name_calm_threshold_std].iloc[0].to_numpy()[:800]
 
                 x = range(1, len(cusum) + 1)
                 ax_1 = ax_dict_1[fig_name]
@@ -637,12 +654,12 @@ def make_vis_score(df_history):
                 df_name_calm = '_'.join([*df_name_list[:5], 'calm', *df_name_list[6:-1], stat])
                 df_name_calm_std = '_'.join([*df_name_list[:5], 'calm', *df_name_list[6:-1], 'std'])
 
-                scusum = df_history[df_name_scusum].iloc[0].to_numpy()[:2000]
-                scusum_std = df_history[df_name_scusum_std].iloc[0].to_numpy()[:2000]
-                scanb = df_history[df_name_scanb].iloc[0].to_numpy()[:2000]
-                scanb_std = df_history[df_name_scanb_std].iloc[0].to_numpy()[:2000]
-                calm = df_history[df_name_calm].iloc[0].to_numpy()[:2000]
-                calm_std = df_history[df_name_calm_std].iloc[0].to_numpy()[:2000]
+                scusum = df_history[df_name_scusum].iloc[0].to_numpy()[:800]
+                scusum_std = df_history[df_name_scusum_std].iloc[0].to_numpy()[:800]
+                scanb = df_history[df_name_scanb].iloc[0].to_numpy()[:800]
+                scanb_std = df_history[df_name_scanb_std].iloc[0].to_numpy()[:800]
+                calm = df_history[df_name_calm].iloc[0].to_numpy()[:800]
+                calm_std = df_history[df_name_calm_std].iloc[0].to_numpy()[:800]
 
                 df_name_scusum_threshold = '_'.join([*df_name_list[:-2], 'threshold', stat])
                 df_name_scusum_threshold_std = '_'.join([*df_name_list[:-2], 'threshold', 'std'])
@@ -655,12 +672,12 @@ def make_vis_score(df_history):
                 df_name_calm_threshold_std = '_'.join([*df_name_list[:5], 'calm', *df_name_list[6:-2],
                                                        'threshold', 'std'])
 
-                scusum_threshold = df_history[df_name_scusum_threshold].iloc[0].to_numpy()[:2000]
-                scusum_threshold_std = df_history[df_name_scusum_threshold_std].iloc[0].to_numpy()[:2000]
-                scanb_threshold = df_history[df_name_scanb_threshold].iloc[0].to_numpy()[:2000]
-                scanb_threshold_std = df_history[df_name_scanb_threshold_std].iloc[0].to_numpy()[:2000]
-                calm_threshold = df_history[df_name_calm_threshold].iloc[0].to_numpy()[:2000]
-                calm_threshold_std = df_history[df_name_calm_threshold_std].iloc[0].to_numpy()[:2000]
+                scusum_threshold = df_history[df_name_scusum_threshold].iloc[0].to_numpy()[:800]
+                scusum_threshold_std = df_history[df_name_scusum_threshold_std].iloc[0].to_numpy()[:800]
+                scanb_threshold = df_history[df_name_scanb_threshold].iloc[0].to_numpy()[:800]
+                scanb_threshold_std = df_history[df_name_scanb_threshold_std].iloc[0].to_numpy()[:800]
+                calm_threshold = df_history[df_name_calm_threshold].iloc[0].to_numpy()[:800]
+                calm_threshold_std = df_history[df_name_calm_threshold_std].iloc[0].to_numpy()[:800]
 
                 x = range(1, len(scusum) + 1)
                 ax_1 = ax_dict_1[fig_name]
@@ -753,28 +770,26 @@ def make_vis_change(df_mean):
     color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue', 'calm': 'cyan'}
     linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':', 'calm': '-.'}
     marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p', 'calm': 's'}
-    fontsize_dict = {'legend': 16, 'label': 16, 'ticks': 16}
-    loc_dict = {'change': 'upper right'}
+    fontsize_dict = {'legend': 10, 'label': 16, 'ticks': 16}
+    loc_dict = {'change': 'best'}
     fig_names = tree()
     for df_name in df_mean:
         df_name_list = df_name.split('_')
         metric_name, stat = df_name_list[-2], df_name_list[-1]
         data_name = df_name_list[0]
-        change = df_name_list[3]
-        noise = df_name_list[4]
-        test_mode = df_name_list[5]
-        arl = df_name_list[6]
+        change = df_name_list[4]
+        noise = df_name_list[5]
+        test_mode = df_name_list[6]
+        arl = df_name_list[7]
+
         mask_mvn_mean = 'MVN' in data_name and change.split('-')[1] == '0.0' and \
-                        noise == '0' and arl == '2000' and metric_name == 'CADD' and stat == 'mean'
+                        noise == '0' and arl == '800' and metric_name == 'EDD' and stat == 'mean'
         mask_mvn_logvar = 'MVN' in data_name and change.split('-')[0] == '0.0' and \
-                          noise == '0' and arl == '2000' and metric_name == 'CADD' and stat == 'mean'
-        mask_exp_tau = 'EXP' in data_name and noise == '0' and arl == '2000' and metric_name == 'CADD' and stat == 'mean'
-        mask_rbm_tau = 'RBM' in data_name and noise == '0' and arl == '2000' and metric_name == 'CADD' and stat == 'mean'
+                          noise == '0' and arl == '800' and metric_name == 'EDD' and stat == 'mean'
+        mask_exp_tau = 'EXP' in data_name and noise == '0' and arl == '800' and metric_name == 'EDD' and stat == 'mean'
+        mask_rbm_tau = 'RBM' in data_name and noise == '0' and arl == '800' and metric_name == 'EDD' and stat == 'mean'
         if mask_mvn_mean:
-            if change == '0.0-0.0':
-                fig_names_ = ['mvn-mean', 'mvn-logvar']
-            else:
-                fig_names_ = ['mvn-mean']
+            fig_names_ = ['mvn-mean']
             x = float(change.split('-')[0])
         elif mask_mvn_logvar:
             fig_names_ = ['mvn-logvar']
@@ -790,17 +805,19 @@ def make_vis_change(df_mean):
         df_name_std = '_'.join([*df_name_list[:-1], 'std'])
         y = df_mean[df_name].iloc[0].to_numpy().item()
         y_std = df_mean[df_name_std].iloc[0].to_numpy().item()
+
         for fig_name in fig_names_:
             if test_mode not in fig_names[fig_name]:
                 fig_names[fig_name][test_mode] = defaultdict(list)
             fig_names[fig_name][test_mode]['x'].append(x)
             fig_names[fig_name][test_mode]['y'].append(y)
             fig_names[fig_name][test_mode]['y_std'].append(y_std)
+
     fig = {}
     ax_dict_1 = {}
     figsize = (5, 4)
-    xlabel_dict = {'mvn-mean': '$\epsilon \mu$', 'mvn-logvar': '$\epsilon \log(\sigma^2)$',
-                   'exp-tau': '$\epsilon \\tau$', 'rbm-W': '$\sigma_{\epsilon}$'}
+    xlabel_dict = {'mvn-mean': '$\epsilon_{\mu}$', 'mvn-logvar': '$\epsilon_{\log(\sigma^2)}$', 'exp-tau': '$\epsilon_{\\xi}$',
+                   'rbm-W': '$\sigma_{\epsilon}$'}
     for fig_name in fig_names:
         for test_mode in fig_names[fig_name]:
             x, y, y_std = fig_names[fig_name][test_mode]['x'], fig_names[fig_name][test_mode]['y'], \
@@ -814,7 +831,7 @@ def make_vis_change(df_mean):
             xlabel = xlabel_dict[fig_name]
             ylabel = 'Empirical CADD'
             pivot = test_mode
-            ax_1.errorbar(x, y, yerr=y_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
+            ax_1.errorbar(x[1::], y[1::], yerr=y_std[1::], color=color_dict[pivot], linestyle=linestyle_dict[pivot],
                           label=label_dict[pivot], marker=marker_dict[pivot])
             ax_1.set_xlabel(xlabel, fontsize=fontsize_dict['label'])
             ax_1.set_ylabel(ylabel, fontsize=fontsize_dict['label'])
@@ -840,113 +857,107 @@ def make_vis_arl(df_mean):
     color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue', 'calm': 'cyan'}
     linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':', 'calm': '-.'}
     marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p', 'calm': 's'}
-    fontsize_dict = {'legend': 16, 'label': 16, 'ticks': 16}
-    loc_dict = {'arl': 'upper right'}
+    fontsize_dict = {'legend': 10, 'label': 16, 'ticks': 16}
+    loc_dict = {'arl': 'upper left'}
     fig_names = tree()
     for df_name in df_mean:
         df_name_list = df_name.split('_')
         metric_name, stat = df_name_list[-2], df_name_list[-1]
         data_name = df_name_list[0]
-        change = df_name_list[3]
-        noise = df_name_list[4]
-        test_mode = df_name_list[5]
-        arl = df_name_list[6]
-        mask_mvn_mean_0 = 'MVN' in data_name and change == '0.0-0.0' and \
-                          noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        mask_mvn_mean_1 = 'MVN' in data_name and change == '0.1-0.0' and \
-                          noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        mask_mvn_logvar_1 = 'MVN' in data_name and change == '0.0-0.5' and \
-                            noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        mask_exp_tau_0 = 'EXP' in data_name and change == '0.0' and \
-                         noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        mask_exp_tau_1 = 'EXP' in data_name and change == '1.0' and \
-                         noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        mask_rbm_tau_0 = 'RBM' in data_name and change == '0.0' and \
-                         noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        mask_rbm_tau_1 = 'RBM' in data_name and change == '0.05' and \
-                         noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        if mask_mvn_mean_0:
-            fig_names_ = ['mvn-mean', 'mvn-logvar']
-            mode = '0'
-        elif mask_mvn_mean_1:
-            fig_names_ = ['mvn-mean']
-            mode = '1'
-        elif mask_mvn_logvar_1:
-            fig_names_ = ['mvn-logvar']
-            mode = '1'
-        elif mask_exp_tau_0:
-            fig_names_ = ['exp-tau']
-            mode = '0'
-        elif mask_exp_tau_1:
-            fig_names_ = ['exp-tau']
-            mode = '1'
-        elif mask_rbm_tau_0:
-            fig_names_ = ['rbm-W']
-            mode = '0'
-        elif mask_rbm_tau_1:
-            fig_names_ = ['rbm-W']
-            mode = '1'
-        else:
-            continue
+        change = df_name_list[4]
+        noise = df_name_list[5]
+        test_mode = df_name_list[6]
+        arl = df_name_list[7]
+
         df_name_std = '_'.join([*df_name_list[:-1], 'std'])
         x = float(arl)
-        y = df_mean[df_name].iloc[0].to_numpy().item()
-        y_std = df_mean[df_name_std].iloc[0].to_numpy().item()
+        y_1 = df_mean[df_name].iloc[0].to_numpy().item()
+        y_1_std = df_mean[df_name_std].iloc[0].to_numpy().item()
+        df_name_2 = '_'.join([*df_name_list[:-2], 'ARL', 'mean'])
+        df_name_2_std = '_'.join([*df_name_list[:-2], 'ARL', 'std'])
+        y_2 = df_mean[df_name_2].iloc[0].to_numpy().item()
+        y_2_std = df_mean[df_name_2_std].iloc[0].to_numpy().item()
+
+        mask_mvn_mean = 'MVN' in data_name and change == '0.1-0.0' and \
+                          noise == '0' and metric_name == 'EDD' and stat == 'mean'
+        mask_mvn_logvar = 'MVN' in data_name and change == '0.0-0.5' and \
+                            noise == '0' and metric_name == 'EDD' and stat == 'mean'
+        mask_exp_tau = 'EXP' in data_name and change == '1.0' and \
+                         noise == '0' and metric_name == 'EDD' and stat == 'mean'
+        mask_rbm_W = 'RBM' in data_name and change == '0.01' and \
+                         noise == '0' and metric_name == 'EDD' and stat == 'mean'
+        if mask_mvn_mean:
+            fig_names_ = ['mvn-mean']
+        elif mask_mvn_logvar:
+            fig_names_ = ['mvn-logvar']
+        elif mask_exp_tau:
+            fig_names_ = ['exp-tau']
+        elif mask_rbm_W:
+            fig_names_ = ['rbm-W']
+        else:
+            continue
+
         for fig_name in fig_names_:
             if test_mode not in fig_names[fig_name]:
-                fig_names[fig_name][test_mode]['0'] = defaultdict(list)
                 fig_names[fig_name][test_mode]['1'] = defaultdict(list)
-            fig_names[fig_name][test_mode][mode]['x'].append(x)
-            fig_names[fig_name][test_mode][mode]['y'].append(y)
-            fig_names[fig_name][test_mode][mode]['y_std'].append(y_std)
+                fig_names[fig_name][test_mode]['2'] = defaultdict(list)
+            fig_names[fig_name][test_mode]['1']['x'].append(x)
+            fig_names[fig_name][test_mode]['1']['y'].append(y_1)
+            fig_names[fig_name][test_mode]['1']['y_std'].append(y_1_std)
+            fig_names[fig_name][test_mode]['2']['x'].append(x)
+            fig_names[fig_name][test_mode]['2']['y'].append(y_2)
+            fig_names[fig_name][test_mode]['2']['y_std'].append(y_2_std)
     fig = {}
     ax_dict_1 = {}
-    ax_dict_2 = {}
-    figsize = (10, 4)
+    # ax_dict_2 = {}
+    # figsize = (10, 4)
+    figsize = (5, 4)
     for fig_name in fig_names:
         for test_mode in fig_names[fig_name]:
             x_1, y_1, y_1_std = fig_names[fig_name][test_mode]['1']['x'], fig_names[fig_name][test_mode]['1']['y'], \
                                 fig_names[fig_name][test_mode]['1']['y_std']
-            x_0, y_0, y_0_std = fig_names[fig_name][test_mode]['0']['x'], fig_names[fig_name][test_mode]['0']['y'], \
-                                fig_names[fig_name][test_mode]['0']['y_std']
+            x_2, y_2, y_2_std = fig_names[fig_name][test_mode]['2']['x'], fig_names[fig_name][test_mode]['2']['y'], \
+                                fig_names[fig_name][test_mode]['2']['y_std']
             x_1, y_1, y_1_std = zip(*sorted(zip(x_1, y_1, y_1_std)))
             x_1, y_1, y_1_std = np.array(x_1), np.array(y_1), np.array(y_1_std)
-            x_0, y_0, y_0_std = zip(*sorted(zip(x_0, y_0, y_0_std)))
-            x_0, y_0, y_0_std = np.array(x_0), np.array(y_0), np.array(y_0_std)
+            x_2, y_2, y_2_std = zip(*sorted(zip(x_2, y_2, y_2_std)))
+            x_2, y_2, y_2_std = np.array(x_2), np.array(y_2), np.array(y_2_std)
             fig[fig_name] = plt.figure(fig_name, figsize=figsize)
             if fig_name not in ax_dict_1:
-                ax_dict_1[fig_name] = fig[fig_name].add_subplot(121)
-                ax_dict_2[fig_name] = fig[fig_name].add_subplot(122)
+                # ax_dict_1[fig_name] = fig[fig_name].add_subplot(121)
+                # ax_dict_2[fig_name] = fig[fig_name].add_subplot(122)
+                ax_dict_1[fig_name] = fig[fig_name].subplots()
             ax_1 = ax_dict_1[fig_name]
-            ax_2 = ax_dict_2[fig_name]
-            xlabel = 'ARL'
+            # ax_2 = ax_dict_2[fig_name]
+            xlabel = 'Empirical ARL'
             ylabel = 'Empirical CADD'
             pivot = test_mode
-            ax_1.errorbar(x_1, y_1, yerr=y_1_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
+            ax_1.errorbar(y_2, y_1, yerr=y_1_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
                           label=label_dict[pivot], marker=marker_dict[pivot])
             ax_1.set_xlabel(xlabel, fontsize=fontsize_dict['label'])
             ax_1.set_ylabel(ylabel, fontsize=fontsize_dict['label'])
             ax_1.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_1.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
-            ax_1.legend(loc=loc_dict['arl'], fontsize=fontsize_dict['legend'])
             ax_1.set_xscale('log')
             ax_1.set_yscale('log')
+            ax_1.legend(loc=loc_dict['arl'], fontsize=fontsize_dict['legend'])
 
-            xlabel = 'ARL'
-            ylabel = 'Empirical ARL'
-            ax_2.errorbar(x_0, y_0, yerr=y_0_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
-                          label=label_dict[pivot], marker=marker_dict[pivot])
-            ax_2.set_xlabel(xlabel, fontsize=fontsize_dict['label'])
-            ax_2.set_ylabel(ylabel, fontsize=fontsize_dict['label'])
-            ax_2.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
-            ax_2.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
-            ax_2.legend(loc=loc_dict['arl'], fontsize=fontsize_dict['legend'])
-            ax_2.set_xscale('log')
-            ax_2.set_yscale('log')
+            # xlabel = 'ARL'
+            # ylabel = 'Empirical ARL'
+            # ax_2.errorbar(x_2, y_2, yerr=y_2_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
+            #               label=label_dict[pivot], marker=marker_dict[pivot])
+            # ax_2.set_xlabel(xlabel, fontsize=fontsize_dict['label'])
+            # ax_2.set_ylabel(ylabel, fontsize=fontsize_dict['label'])
+            # ax_2.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
+            # ax_2.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
+            # ax_2.legend(loc=loc_dict['arl'], fontsize=fontsize_dict['legend'])
+            # ax_2.set_xscale('log')
+            # ax_2.set_yscale('log')
+            # ax_2.legend(loc=loc_dict['arl'], fontsize=fontsize_dict['legend'])
+
     for fig_name in fig:
         fig[fig_name] = plt.figure(fig_name)
         ax_dict_1[fig_name].grid(linestyle='--', linewidth='0.5')
-        ax_dict_2[fig_name].grid(linestyle='--', linewidth='0.5')
         fig[fig_name].tight_layout()
         dir_name = 'arl'
         dir_path = os.path.join(vis_path, dir_name)
@@ -962,31 +973,31 @@ def make_vis_noise(df_mean):
     color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue', 'calm': 'cyan'}
     linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':', 'calm': '-.'}
     marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p', 'calm': 's'}
-    fontsize_dict = {'legend': 16, 'label': 16, 'ticks': 16}
-    loc_dict = {'noise': 'upper right'}
+    fontsize_dict = {'legend': 10, 'label': 16, 'ticks': 16}
+    loc_dict = {'noise': 'lower left'}
     fig_names = tree()
     for df_name in df_mean:
         df_name_list = df_name.split('_')
         metric_name, stat = df_name_list[-2], df_name_list[-1]
         data_name = df_name_list[0]
-        change = df_name_list[3]
-        noise = df_name_list[4]
-        test_mode = df_name_list[5]
-        arl = df_name_list[6]
+        change = df_name_list[4]
+        noise = df_name_list[5]
+        test_mode = df_name_list[6]
+        arl = df_name_list[7]
         mask_mvn_mean_0 = 'MVN' in data_name and change == '0.0-0.0' and \
-                          arl == '2000' and metric_name == 'CADD' and stat == 'mean'
+                          arl == '800' and metric_name == 'EDD' and stat == 'mean'
         mask_mvn_mean_1 = 'MVN' in data_name and change == '0.1-0.0' and \
-                          arl == '2000' and metric_name == 'CADD' and stat == 'mean'
+                          arl == '800' and metric_name == 'EDD' and stat == 'mean'
         mask_mvn_logvar_1 = 'MVN' in data_name and change == '0.0-0.5' and \
-                            arl == '2000' and metric_name == 'CADD' and stat == 'mean'
+                            arl == '800' and metric_name == 'EDD' and stat == 'mean'
         mask_exp_tau_0 = 'EXP' in data_name and change == '0.0' and \
-                         arl == '2000' and metric_name == 'CADD' and stat == 'mean'
+                         arl == '800' and metric_name == 'EDD' and stat == 'mean'
         mask_exp_tau_1 = 'EXP' in data_name and change == '1.0' and \
-                         arl == '2000' and metric_name == 'CADD' and stat == 'mean'
+                         arl == '800' and metric_name == 'EDD' and stat == 'mean'
         mask_rbm_tau_0 = 'RBM' in data_name and change == '0.0' and \
-                         arl == '2000' and metric_name == 'CADD' and stat == 'mean'
+                         arl == '800' and metric_name == 'EDD' and stat == 'mean'
         mask_rbm_tau_1 = 'RBM' in data_name and change == '0.05' and \
-                         arl == '2000' and metric_name == 'CADD' and stat == 'mean'
+                         arl == '800' and metric_name == 'EDD' and stat == 'mean'
         if mask_mvn_mean_0:
             fig_names_ = ['mvn-mean', 'mvn-logvar']
             mode = '0'
@@ -1052,7 +1063,10 @@ def make_vis_noise(df_mean):
             ax_1.set_ylabel(ylabel, fontsize=fontsize_dict['label'])
             ax_1.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_1.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
-            ax_1.legend(loc=loc_dict['noise'], fontsize=fontsize_dict['legend'])
+            if fig_name == 'rbm-W':
+                ax_1.legend(loc='center left', fontsize=fontsize_dict['legend'])
+            else:
+                ax_1.legend(loc=loc_dict['noise'], fontsize=fontsize_dict['legend'])
             ax_1.set_xscale('log')
             ax_1.set_yscale('log')
 
@@ -1064,7 +1078,10 @@ def make_vis_noise(df_mean):
             ax_2.set_ylabel(ylabel, fontsize=fontsize_dict['label'])
             ax_2.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_2.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
-            ax_2.legend(loc=loc_dict['noise'], fontsize=fontsize_dict['legend'])
+            if fig_name == 'rbm-W':
+                ax_2.legend(loc='center left', fontsize=fontsize_dict['legend'])
+            else:
+                ax_2.legend(loc=loc_dict['noise'], fontsize=fontsize_dict['legend'])
             ax_2.set_xscale('log')
             ax_2.set_yscale('log')
     for fig_name in fig:
@@ -1082,10 +1099,10 @@ def make_vis_noise(df_mean):
 
 
 def make_vis_lambda(df_mean):
-    label_dict = {'cusum': 'CUSUM', 'scusum': 'SCUSUM', 'scanb': 'Scan B-statistic', 'calm': 'CALM-MMD'}
-    color_dict = {'cusum': 'black', 'scusum': 'red', 'scanb': 'blue', 'calm': 'cyan'}
-    linestyle_dict = {'cusum': '-', 'scusum': '--', 'scanb': ':', 'calm': '-.'}
-    marker_dict = {'cusum': 'D', 'scusum': 'o', 'scanb': 'p', 'calm': 's'}
+    label_dict = {'cadd': 'Empirical CADD', 'arl': 'Empirical ARL', 'lambda': '$\lambda$'}
+    color_dict = {'cadd': 'red', 'arl': 'red', 'lambda': 'green'}
+    linestyle_dict = {'cadd': '-.', 'arl': '--', 'lambda': '-'}
+    marker_dict = {'cadd': 'D', 'arl': 'o', 'lambda': 'p'}
     fontsize_dict = {'legend': 16, 'label': 16, 'ticks': 16}
     loc_dict = {'lambda': 'upper right'}
     fig_names = tree()
@@ -1093,72 +1110,69 @@ def make_vis_lambda(df_mean):
         df_name_list = df_name.split('_')
         metric_name, stat = df_name_list[-2], df_name_list[-1]
         data_name = df_name_list[0]
-        change = df_name_list[3]
-        noise = df_name_list[4]
-        test_mode = df_name_list[5]
-        arl = df_name_list[6]
-        pre_length = df_name_list[7]
-        mask_mvn_mean_0 = 'MVN' in data_name and change == '0.0-0.0' and test_mode == 'scusum' and \
-                          arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        mask_mvn_mean_1 = 'MVN' in data_name and change == '0.1-0.0' and test_mode == 'scusum' and \
-                          arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        mask_mvn_mean_2 = 'MVN' in data_name and change == '0.1-0.0' and test_mode == 'scusum' and \
-                          arl == '2000' and noise == '0' and metric_name == 'lambda' and stat == 'mean'
-        mask_mvn_logvar_1 = 'MVN' in data_name and change == '0.0-0.5' and test_mode == 'scusum' and \
-                            arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        mask_mvn_logvar_2 = 'MVN' in data_name and change == '0.0-0.5' and test_mode == 'scusum' and \
-                            arl == '2000' and noise == '0' and metric_name == 'lambda' and stat == 'mean'
-        mask_exp_tau_0 = 'EXP' in data_name and change == '0.0' and test_mode == 'scusum' and \
-                         arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        mask_exp_tau_1 = 'EXP' in data_name and change == '1.0' and test_mode == 'scusum' and \
-                         arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        mask_exp_tau_2 = 'EXP' in data_name and change == '1.0' and test_mode == 'scusum' and \
-                         arl == '2000' and noise == '0' and metric_name == 'lambda' and stat == 'mean'
-        mask_rbm_tau_0 = 'RBM' in data_name and change == '0.0' and test_mode == 'scusum' and \
-                         arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        mask_rbm_tau_1 = 'RBM' in data_name and change == '0.05' and test_mode == 'scusum' and \
-                         arl == '2000' and noise == '0' and metric_name == 'CADD' and stat == 'mean'
-        mask_rbm_tau_2 = 'RBM' in data_name and change == '0.05' and test_mode == 'scusum' and \
-                         arl == '2000' and noise == '0' and metric_name == 'lambda' and stat == 'mean'
-        if mask_mvn_mean_0:
-            fig_names_ = ['mvn-mean', 'mvn-logvar']
-            mode = '0'
-        elif mask_mvn_mean_1:
+        change = df_name_list[4]
+        noise = df_name_list[5]
+        test_mode = df_name_list[6]
+        arl = df_name_list[7]
+        pre_length = df_name_list[8]
+        
+        mask_mvn_mean = 'MVN' in data_name and change == '0.1-0.0' and test_mode == 'scusum' and \
+                          arl == '800' and noise == '0' and stat == 'mean'
+        mask_mvn_logvar = 'MVN' in data_name and change == '0.0-0.5' and test_mode == 'scusum' and \
+                            arl == '800' and noise == '0' and stat == 'mean'
+        mask_exp_tau = 'EXP' in data_name and change == '1.0' and test_mode == 'scusum' and \
+                         arl == '800' and noise == '0' and stat == 'mean'
+        mask_rbm_W = 'RBM' in data_name and change == '0.01' and test_mode == 'scusum' and \
+                         arl == '800' and noise == '0' and stat == 'mean'
+
+        if mask_mvn_mean:
             fig_names_ = ['mvn-mean']
-            mode = '1'
-        elif mask_mvn_mean_2:
-            fig_names_ = ['mvn-mean']
-            mode = '2'
-        elif mask_mvn_logvar_1:
+            if metric_name == 'lambda':
+                mode = '0'
+            elif metric_name == 'EDD':
+                mode = '1'
+            elif metric_name == 'ARL':
+                mode = '2'
+            else:
+                continue
+        elif mask_mvn_logvar:
             fig_names_ = ['mvn-logvar']
-            mode = '1'
-        elif mask_mvn_logvar_2:
-            fig_names_ = ['mvn-logvar']
-            mode = '2'
-        elif mask_exp_tau_0:
+            if metric_name == 'lambda':
+                mode = '0'
+            elif metric_name == 'EDD':
+                mode = '1'
+            elif metric_name == 'ARL':
+                mode = '2'
+            else:
+                continue
+        elif mask_exp_tau:
             fig_names_ = ['exp-tau']
-            mode = '0'
-        elif mask_exp_tau_1:
-            fig_names_ = ['exp-tau']
-            mode = '1'
-        elif mask_exp_tau_2:
-            fig_names_ = ['exp-tau']
-            mode = '2'
-        elif mask_rbm_tau_0:
+            if metric_name == 'lambda':
+                mode = '0'
+            elif metric_name == 'EDD':
+                mode = '1'
+            elif metric_name == 'ARL':
+                mode = '2'
+            else:
+                continue
+        elif mask_rbm_W:
             fig_names_ = ['rbm-W']
-            mode = '0'
-        elif mask_rbm_tau_1:
-            fig_names_ = ['rbm-W']
-            mode = '1'
-        elif mask_rbm_tau_2:
-            fig_names_ = ['rbm-W']
-            mode = '2'
+            if metric_name == 'lambda':
+                mode = '0'
+            elif metric_name == 'EDD':
+                mode = '1'
+            elif metric_name == 'ARL':
+                mode = '2'
+            else:
+                continue
         else:
             continue
+
         df_name_std = '_'.join([*df_name_list[:-1], 'std'])
         x = float(pre_length)
         y = df_mean[df_name].iloc[0].to_numpy().item()
         y_std = df_mean[df_name_std].iloc[0].to_numpy().item()
+
         for fig_name in fig_names_:
             if test_mode not in fig_names[fig_name]:
                 fig_names[fig_name][test_mode]['0'] = defaultdict(list)
@@ -1167,6 +1181,7 @@ def make_vis_lambda(df_mean):
             fig_names[fig_name][test_mode][mode]['x'].append(x)
             fig_names[fig_name][test_mode][mode]['y'].append(y)
             fig_names[fig_name][test_mode][mode]['y_std'].append(y_std)
+            
     fig = {}
     ax_dict_1 = {}
     ax_dict_2 = {}
@@ -1174,18 +1189,18 @@ def make_vis_lambda(df_mean):
     figsize = (15, 4)
     for fig_name in fig_names:
         for test_mode in fig_names[fig_name]:
-            x_1, y_1, y_1_std = fig_names[fig_name][test_mode]['1']['x'], fig_names[fig_name][test_mode]['1']['y'], \
-                                fig_names[fig_name][test_mode]['1']['y_std']
             x_0, y_0, y_0_std = fig_names[fig_name][test_mode]['0']['x'], fig_names[fig_name][test_mode]['0']['y'], \
                                 fig_names[fig_name][test_mode]['0']['y_std']
+            x_1, y_1, y_1_std = fig_names[fig_name][test_mode]['1']['x'], fig_names[fig_name][test_mode]['1']['y'], \
+                                fig_names[fig_name][test_mode]['1']['y_std']
             x_2, y_2, y_2_std = fig_names[fig_name][test_mode]['2']['x'], fig_names[fig_name][test_mode]['2']['y'], \
                                 fig_names[fig_name][test_mode]['2']['y_std']
             if len(y_1) == 0 or len(y_0) == 0 or len(y_2) == 0:
                 continue
-            x_1, y_1, y_1_std = zip(*sorted(zip(x_1, y_1, y_1_std)))
-            x_1, y_1, y_1_std = np.array(x_1), np.array(y_1), np.array(y_1_std)
             x_0, y_0, y_0_std = zip(*sorted(zip(x_0, y_0, y_0_std)))
             x_0, y_0, y_0_std = np.array(x_0), np.array(y_0), np.array(y_0_std)
+            x_1, y_1, y_1_std = zip(*sorted(zip(x_1, y_1, y_1_std)))
+            x_1, y_1, y_1_std = np.array(x_1), np.array(y_1), np.array(y_1_std)
             x_2, y_2, y_2_std = zip(*sorted(zip(x_2, y_2, y_2_std)))
             x_2, y_2, y_2_std = np.array(x_2), np.array(y_2), np.array(y_2_std)
             fig[fig_name] = plt.figure(fig_name, figsize=figsize)
@@ -1196,38 +1211,51 @@ def make_vis_lambda(df_mean):
             ax_1 = ax_dict_1[fig_name]
             ax_2 = ax_dict_2[fig_name]
             ax_3 = ax_dict_3[fig_name]
+            
             xlabel = '$m$'
-            ylabel = 'Empirical CADD'
-            pivot = test_mode
-            ax_1.errorbar(x_1, y_1, yerr=y_1_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
-                          label=label_dict[pivot], marker=marker_dict[pivot])
+            ylabel = '$\lambda$'
+            pivot = 'lambda'
+            ax_1.errorbar(x_0, y_0, yerr=y_0_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
+                      label=label_dict[pivot], marker=marker_dict[pivot])
             ax_1.set_xlabel(xlabel, fontsize=fontsize_dict['label'])
             ax_1.set_ylabel(ylabel, fontsize=fontsize_dict['label'])
             ax_1.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_1.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_1.legend(loc=loc_dict['lambda'], fontsize=fontsize_dict['legend'])
-            if fig_name == 'rbm-W':
-                ylim_1 = list(ax_1.get_ylim())
-                ylim_1[0] = ylim_1[0] - 1.5
-                ylim_1[1] = ylim_1[1] + 1.5
-                ax_1.set_ylim(ylim_1)
-            ax_1.set_xscale('log')
-            ax_1.set_yscale('log')
+            # if fig_name == 'rbm-W':
+            #     ylim_1 = list(ax_1.get_ylim())
+            #     ylim_1[0] = 0.95
+            #     ylim_1[1] = 1.05
+            #     ax_1.set_ylim(ylim_1)
+            #     ax_1.set_yticks([0.95, 1.0, 1.05])
+            # else:
+            #     ylim_1 = list(ax_1.get_ylim())
+            #     ylim_1[0] = 0.0
+            #     ylim_1[1] = 1.5
+            #     ax_1.set_ylim(ylim_1)
+            ax_1.set_xticks([0, 100, 200, 300, 400, 500])
+            # ax_1.set_ylim([0, 1.5])
 
             xlabel = '$m$'
-            ylabel = 'Empirical ARL'
-            ax_2.errorbar(x_0, y_0, yerr=y_0_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
+            ylabel = 'Empirical CADD'
+            pivot = 'cadd'
+            ax_2.errorbar(x_1, y_1, yerr=y_1_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
                           label=label_dict[pivot], marker=marker_dict[pivot])
             ax_2.set_xlabel(xlabel, fontsize=fontsize_dict['label'])
             ax_2.set_ylabel(ylabel, fontsize=fontsize_dict['label'])
             ax_2.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_2.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_2.legend(loc=loc_dict['lambda'], fontsize=fontsize_dict['legend'])
-            ax_2.set_xscale('log')
-            ax_2.set_yscale('log')
+            ax_2.set_xticks([0, 100, 200, 300, 400, 500])
+            # ax_2.set_yscale('log')
+            # if fig_name == 'rbm-W':
+            #     ax_2.set_ylim([15, 35])
+            # else:
+            #     ax_2.set_ylim([0, 1000])
 
             xlabel = '$m$'
-            ylabel = '$\lambda$'
+            ylabel = 'Empirical ARL'
+            pivot = 'arl'
             ax_3.errorbar(x_2, y_2, yerr=y_2_std, color=color_dict[pivot], linestyle=linestyle_dict[pivot],
                           label=label_dict[pivot], marker=marker_dict[pivot])
             ax_3.set_xlabel(xlabel, fontsize=fontsize_dict['label'])
@@ -1235,12 +1263,12 @@ def make_vis_lambda(df_mean):
             ax_3.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_3.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_3.legend(loc=loc_dict['lambda'], fontsize=fontsize_dict['legend'])
-            if fig_name == 'rbm-W':
-                ylim_3 = list(ax_3.get_ylim())
-                ylim_3[0] = 0.8
-                ylim_3[1] = 1.2
-                ax_3.set_ylim(ylim_3)
-            ax_3.set_xscale('log')
+            # ax_3.set_ylim(8000, 12000)
+            ax_3.set_xticks([0, 100, 200, 300, 400, 500])
+            # if fig_name == 'rbm-W':
+            #     ax_3.set_ylim([500, 1500])
+            # else:
+            #     ax_3.set_ylim([0, 1000])
             # ax_3.set_yscale('log')
     for fig_name in fig:
         fig[fig_name] = plt.figure(fig_name)
