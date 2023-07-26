@@ -319,7 +319,7 @@ def main():
     # modes = ['mvn-mean-lambda', 'mvn-logvar-lambda', 'exp-tau-lambda', 'rbm-W-lambda']
     # modes = ['mvn-mean-noise', 'mvn-logvar-noise', 'exp-tau-noise', 'rbm-W-noise']
     # modes = ['mvn-mean-arl', 'mvn-logvar-arl', 'exp-tau-arl', 'rbm-W-arl']
-    modes = ['mvn-mean', 'mvn-logvar', 'exp-tau', 'rbm-W']
+    # modes = ['mvn-mean', 'mvn-logvar', 'exp-tau', 'rbm-W']
     controls = []
     for mode in modes:
         controls += make_all_controls(mode)
@@ -329,9 +329,9 @@ def main():
     # make_vis_runtime()
     # make_vis_score(df_history)
     make_vis_change(df_mean)
-    # make_vis_arl(df_mean)
-    # make_vis_noise(df_mean)
-    # make_vis_lambda(df_mean)
+    make_vis_arl(df_mean)
+    make_vis_noise(df_mean)
+    make_vis_lambda(df_mean)
     return
 
 
@@ -1222,19 +1222,7 @@ def make_vis_lambda(df_mean):
             ax_1.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_1.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_1.legend(loc=loc_dict['lambda'], fontsize=fontsize_dict['legend'])
-            # if fig_name == 'rbm-W':
-            #     ylim_1 = list(ax_1.get_ylim())
-            #     ylim_1[0] = 0.95
-            #     ylim_1[1] = 1.05
-            #     ax_1.set_ylim(ylim_1)
-            #     ax_1.set_yticks([0.95, 1.0, 1.05])
-            # else:
-            #     ylim_1 = list(ax_1.get_ylim())
-            #     ylim_1[0] = 0.0
-            #     ylim_1[1] = 1.5
-            #     ax_1.set_ylim(ylim_1)
             ax_1.set_xticks([0, 100, 200, 300, 400, 500])
-            # ax_1.set_ylim([0, 1.5])
 
             xlabel = '$m$'
             ylabel = 'Empirical CADD'
@@ -1247,11 +1235,6 @@ def make_vis_lambda(df_mean):
             ax_2.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_2.legend(loc=loc_dict['lambda'], fontsize=fontsize_dict['legend'])
             ax_2.set_xticks([0, 100, 200, 300, 400, 500])
-            # ax_2.set_yscale('log')
-            # if fig_name == 'rbm-W':
-            #     ax_2.set_ylim([15, 35])
-            # else:
-            #     ax_2.set_ylim([0, 1000])
 
             xlabel = '$m$'
             ylabel = 'Empirical ARL'
@@ -1263,13 +1246,7 @@ def make_vis_lambda(df_mean):
             ax_3.xaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_3.yaxis.set_tick_params(labelsize=fontsize_dict['ticks'])
             ax_3.legend(loc=loc_dict['lambda'], fontsize=fontsize_dict['legend'])
-            # ax_3.set_ylim(8000, 12000)
             ax_3.set_xticks([0, 100, 200, 300, 400, 500])
-            # if fig_name == 'rbm-W':
-            #     ax_3.set_ylim([500, 1500])
-            # else:
-            #     ax_3.set_ylim([0, 1000])
-            # ax_3.set_yscale('log')
     for fig_name in fig:
         fig[fig_name] = plt.figure(fig_name)
         ax_dict_1[fig_name].grid(linestyle='--', linewidth='0.5')
